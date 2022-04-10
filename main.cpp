@@ -51,7 +51,8 @@ int main(int argc, char *argv[]) {
         sumaRestante - Actores[actorActual].influencia
       );
     }
-    clique loAgrego = cliqueMasInfluyenteBT( //agrego el actor actual al clique
+
+    clique loAgrego = cliqueMasInfluyenteBT( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
         cliqueActual.actores.push(Actores[actorActual]),
         actorActual + 1,
         influenciaParcial + Actores[actorActual].influencia,
@@ -63,9 +64,9 @@ int main(int argc, char *argv[]) {
         influenciaParcial,
         sumaRestante - Actores[actorActual].influencia
       );
-    return noLoAgrego.influencia > loAgrego.influencia ? noLoAgrego : loAgrego; //Devuelvo el cliqué con mas influencia
+    return noLoAgrego.influencia > loAgrego.influencia ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
   }
-
+  //se correría asi -> cliqueMasInfluyentesBT(new clique(), 0, 0, sumaInfluenciaTotal);
 
 
   if (argc < 5) {
