@@ -14,6 +14,60 @@ string ID_ACTOR = "n";
 string ID_AMISTAD = "e";
 
 int main(int argc, char *argv[]) {
+
+  //Funcion BT Ej 1
+  int influenciaMax; //holder para la influencia Máxima voy a ir actualizando con la mejor que tenga hasta el momento
+  int sumaInfluenciaTotal; //Sumatoria de todas las influencias de todos los actores
+  clique cliqueMasInfluyenteBT (clique cliqueActual, int actorActual, int influenciaParcial, int sumaRestante ) {
+    
+    //Caso base
+    if(actorActual == Actores.size() - 1){
+      cliqueActual.influencia = influenciaParcial;
+      if(influenciaMax < influenciaParcial ){
+        influenciaMax = influenciaParcial;
+      }
+      return cliqueActual;
+    }
+
+    //Poda de optimalidad
+    if(sumaRestante + influenciaParcial < influenciaMax){
+      return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+    }
+
+
+    //Poda de factibilidad 
+    bool hayAmistad = true;
+    for(actor a : cliqueActual){
+      if(!sonAmigos(a, Actores[actorActual])){
+        hayAmistad = false;
+        break;
+      }
+    }
+    if(!hayAmistad){
+      return cliqueMasInfluyenteBT(
+        cliqueActual,
+        actorActual + 1,
+        influenciaParcial,
+        sumaRestante - Actores[actorActual].influencia
+      );
+    }
+    clique loAgrego = cliqueMasInfluyenteBT( //agrego el actor actual al clique
+        cliqueActual.actores.push(Actores[actorActual]),
+        actorActual + 1,
+        influenciaParcial + Actores[actorActual].influencia,
+        sumaRestante - Actores[actorActual].influencia
+      );
+    clique noLoAgrego = cliqueMasInfluyenteBT( //no agrego el actor actual al clique
+        cliqueActual,
+        actorActual + 1,
+        influenciaParcial,
+        sumaRestante - Actores[actorActual].influencia
+      );
+    return noLoAgrego.influencia > loAgrego.influencia ? noLoAgrego : loAgrego; //Devuelvo el cliqué con mas influencia
+  }
+
+
+
   if (argc < 5) {
     cerr << "Parámetros faltantes: " << endl << "Cantidad de actores y amistades" << endl;
     return 1;
