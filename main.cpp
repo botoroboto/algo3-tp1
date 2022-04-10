@@ -14,7 +14,10 @@ string ID_ACTOR = "n";
 string ID_AMISTAD = "e";
 
 int main(int argc, char *argv[]) {
-
+  struct clique {
+    vector<actor> actores = {};
+    int infleuncia = 0;
+  }
   //Funcion BT Ej 1
   int influenciaMax; //holder para la influencia Máxima voy a ir actualizando con la mejor que tenga hasta el momento
   int sumaInfluenciaTotal; //Sumatoria de todas las influencias de todos los actores
