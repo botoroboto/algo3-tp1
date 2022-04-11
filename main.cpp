@@ -14,13 +14,32 @@ string ID_ACTOR = "n";
 string ID_AMISTAD = "e";
 
 int main(int argc, char *argv[]) {
+  
+  struct actor {
+    int influencia;
+    int id;
+  }
+
+  vector<actor> Actores;
+  vector<vector<bool>> Amistades;
+  
+  bool sonAmigos(actor a1, actor a2){
+    return Amistades[a1.id][a2.id];
+  }
+
   struct clique {
     vector<actor> actores = {};
     int infleuncia = 0;
   }
+
   //Funcion BT Ej 1
-  int influenciaMax; //holder para la influencia Máxima voy a ir actualizando con la mejor que tenga hasta el momento
-  int sumaInfluenciaTotal; //Sumatoria de todas las influencias de todos los actores
+  
+  int sumaInfluenciaTotal = 0; //Sumatoria de todas las influencias de todos los actores
+  for(actor a : Actores){
+    sumaInfluenciaTotal += a.influencia;
+  }
+
+  int influenciaMax = 0; //holder para la influencia Máxima voy a ir actualizando con la mejor que tenga hasta el momento
   clique cliqueMasInfluyenteBT (clique cliqueActual, int actorActual, int influenciaParcial, int sumaRestante ) {
     
     //Caso base
@@ -37,10 +56,9 @@ int main(int argc, char *argv[]) {
       return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
     }
 
-
     //Poda de factibilidad 
     bool hayAmistad = true;
-    for(actor a : cliqueActual){
+    for(actor a : cliqueActual.actores){
       if(!sonAmigos(a, Actores[actorActual])){
         hayAmistad = false;
         break;
