@@ -36,3 +36,4 @@
 *.ilk
 /build
 /.vscode
+/out
