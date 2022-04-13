@@ -32,7 +32,7 @@ clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenci
     }
     return cliqueActual;
   }
-
+  
   //Poda de optimalidad
   if(sumaRestante + influenciaParcial < influenciaMax){
     return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
@@ -48,13 +48,12 @@ clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenci
   }
   if(!hayAmistad){
     return cliqueMasInfluyenteBT(
-            cliqueActual,
+      cliqueActual,
       actorActual + 1,
       influenciaParcial,
       sumaRestante - Actores[actorActual].influencia
     );
   }
-
 
   clique loAgrego = cliqueMasInfluyenteBT( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
     cliqueActual.clone().addActor(Actores[actorActual]),
@@ -63,14 +62,75 @@ clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenci
     sumaRestante - Actores[actorActual].influencia
   );
   clique noLoAgrego = cliqueMasInfluyenteBT( //no agrego el actor actual al clique
-            cliqueActual,
-            actorActual + 1,
-            influenciaParcial,
-            sumaRestante - Actores[actorActual].influencia
-    );
+    cliqueActual,
+    actorActual + 1,
+    influenciaParcial,
+    sumaRestante - Actores[actorActual].influencia
+  );
 
   return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
 };
+
+cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
+  //caso base
+  if(actoresRestantes.size() < 1){
+    cliqueActual.setInfluencia(influenciaParcial);
+    if(influenciaMax < influenciaParcial){
+      influenciaMax = influenciaParcial;
+    }
+    return cliqueActual;
+  }
+  
+  //Poda de optimalidad
+  if(sumaRestante + influenciaParcial < influenciaMax){
+    return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+  }
+  
+  actor actorActual = actoresRestantes.pop();
+  
+  
+  vector<actor> nuevoVectorDeActoresRestantes = {};
+  int nuevaSumaRestante = sumaRestante;
+  for(actor a : actoresRestantes ){
+    if(sonAmigos(a, actorActual){
+      nuevoVectorDeActoresRestantes.push_back(a);
+    }else{
+      nuevaSumaRestante - a.influencia;
+    }
+  }
+
+  if(nuevaSumaRestante + influenciaParcial < influenciaMax){//la suma restante todvía tiene al actor actual en cuenta...
+    return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+  }
+
+  if(nuevoVectorDeActoresRestantes.size() == actoresRestantes.size()){//esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
+    cliqueActual.setInfluencia(sumaRestante + influenciaParcial); //la influencia es toda la que quedaba mas la que ya traía
+    for(actor a : actoresRestantes){
+      clique.actores.addActor(a);
+    }
+    if(sumaRestante + influenciaParcial > influenciaMax){
+      influenciaMax = sumaRestante + influenciaParcial
+    }
+    return cliqueActual;
+  }
+
+  nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
+  
+  clique loAgrego = cliqueMasInfluyenteBT2( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
+    cliqueActual.clone().addActor(actorActual),
+    nuevoVectorDeActoresRestantes,
+    influenciaParcial + actorActual.influencia,
+    nuevaSumaRestante,
+  );
+  clique noLoAgrego = cliqueMasInfluyenteBT2( //no agrego el actor actual al clique
+    cliqueActual,
+    actoresRestantes,
+    influenciaParcial,
+    nuevaSumaRestante
+  );
+
+  return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
+}
 
 int main(int argc, char *argv[]) {
   //Funcion BT Ej 1
