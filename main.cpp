@@ -80,18 +80,18 @@ clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenci
 };
 
 clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
-  // caso base
+  // Caso base
   if (actoresRestantes.size() < 1) {
     cliqueActual.setInfluencia(influenciaParcial);
-    if(influenciaMax < influenciaParcial){
+    if (influenciaMax < influenciaParcial) {
       influenciaMax = influenciaParcial;
     }
     return cliqueActual;
   }
  
-  //Poda de optimalidad
-  if(sumaRestante + influenciaParcial < influenciaMax){
-    return cliqueActual; //No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+  // Poda de optimalidad
+  if (sumaRestante + influenciaParcial <= influenciaMax) {
+    return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
   }
 
   bool sonTodosAmigos = false;
@@ -99,12 +99,12 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   for (actor a : actoresRestantes) {
     for (actor a2 : actoresRestantes) {
       if (a.id < a2.id) {
-        if (sonAmigos(a, a2)) {
-          sonTodosAmigos = true;
-        } else {
-          sonTodosAmigos = false;
+        sonTodosAmigos = sonAmigos(a, a2);
+        if (!sonTodosAmigos) {
           break;
         }
+      } else {
+        break;
       }
     }
     if (!sonTodosAmigos) {
@@ -114,7 +114,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 
   if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
     cliqueActual.setInfluencia(sumaRestante + influenciaParcial); // la influencia es toda la que quedaba mas la que ya traía
-    for(actor a : actoresRestantes){
+    for (actor a : actoresRestantes) {
       cliqueActual.addActor(a);
     }
     if (sumaRestante + influenciaParcial > influenciaMax) {
@@ -138,6 +138,9 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
       nuevoVectorDeActoresRestantes.push_back(actorTemporal);
     } else {
       nuevaSumaRestante -= a.influencia;
+      if (nuevaSumaRestante + influenciaParcial < influenciaMax) {
+        break;
+      }
     }
   }
 
@@ -153,14 +156,14 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
   
   clique loAgrego = cliqueMasInfluyenteBT2( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
-    cliqueActual.clone().addActor(actorActual),
+    cliqueActual.addActor(actorActual),
     nuevoVectorDeActoresRestantes,
     influenciaParcial + actorActual.influencia,
     nuevaSumaRestante
   );
 
   clique noLoAgrego = cliqueMasInfluyenteBT2( //no agrego el actor actual al clique
-    cliqueActual,
+    cliqueActual.popActor(),
     actoresRestantes,
     influenciaParcial,
     nuevaSumaRestante
@@ -237,16 +240,17 @@ int main(long argc, char *argv[]) {
   }
 
   // Descomentar para debugging
-  // cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
-  // cout << "Procesando..." << endl;
+  cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
+  cout << "Procesando..." << endl;
 
   // Funcion BT Ej 1
   auto start = chrono::steady_clock::now(); // Empieza el clock
+  // clique res = cliqueMasInfluyenteBT(*new clique(), 0, 0, sumaInfluenciaTotal);
   clique res = cliqueMasInfluyenteBT2(*new clique(), Actores, 0, sumaInfluenciaTotal);
   auto end = chrono::steady_clock::now(); // Termina el clock
   double total_time = chrono::duration<double, milli>(end - start).count();
   // Descomentar para debugging
-  // clog << total_time << " ms" << endl;
+  clog << total_time << " ms" << endl;
 
   cout << res.getInfluencia() << endl;
   for (actor a : res.getActores()) {
