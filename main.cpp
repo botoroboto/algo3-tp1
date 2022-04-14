@@ -163,7 +163,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
     cliqueActual,
     actoresRestantes,
     influenciaParcial,
-    sumaRestante - actorActual.influencia
+    nuevaSumaRestante
   );
 
   return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
