@@ -10,6 +10,12 @@
 using namespace std;
 
 int FILE_INDEX = 1;
+int SORT_INDEX = 2;
+int DEBUG_INDEX = 3;
+string DEBUG_FLAG = "debug";
+string SORT_ASCENDING = "asc";
+string SORT_DESCENDING = "desc";
+string SORT_FLAG = SORT_DESCENDING;
 int N = 0;
 int M = 0;
 char ID_FIRST_LINE = 'p';
@@ -122,11 +128,19 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
     }
     return cliqueActual;
   }
-  
+
   actor actorActual;
-  actorActual.id = actoresRestantes[0].id;
-  actorActual.influencia = actoresRestantes[0].influencia;
-  actoresRestantes.erase(actoresRestantes.begin());
+  size_t actorActualIndex = actoresRestantes.size() - 1;
+  if (SORT_FLAG == SORT_ASCENDING) {
+    // Para correr de menor a mayor influencia
+    actorActualIndex = 0;
+  } else {
+    // Para correr de mayor a menor influencia
+    actorActualIndex = actoresRestantes.size() - 1;
+  }
+  actorActual.id = actoresRestantes[actorActualIndex].id;
+  actorActual.influencia = actoresRestantes[actorActualIndex].influencia;
+  actoresRestantes.erase(actoresRestantes.begin() + actorActualIndex);
   
   vector<actor> nuevoVectorDeActoresRestantes = {};
   int nuevaSumaRestante = sumaRestante;
@@ -154,7 +168,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   }
 
   nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
-  
+
   clique loAgrego = cliqueMasInfluyenteBT2( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
     cliqueActual.addActor(actorActual),
     nuevoVectorDeActoresRestantes,
@@ -162,8 +176,10 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
     nuevaSumaRestante
   );
 
+  cliqueActual.popActor();
+  
   clique noLoAgrego = cliqueMasInfluyenteBT2( //no agrego el actor actual al clique
-    cliqueActual.popActor(),
+    cliqueActual,
     actoresRestantes,
     influenciaParcial,
     sumaRestante - actorActual.influencia
@@ -175,8 +191,21 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 // TODO - Parsear desde un file
 int main(long argc, char *argv[]) {
   if (argc < 1) {
-    cerr << "Parámetro faltante: " << endl << "Path al archivo de instancia." << endl;
+    cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
     return 1;
+  }
+  
+  if (argc == 3) {
+    if (argv[SORT_INDEX] == SORT_ASCENDING) {
+      SORT_FLAG = SORT_ASCENDING;
+    } else if (argv[SORT_INDEX] == SORT_DESCENDING) {
+      SORT_FLAG = SORT_DESCENDING;
+    }
+  }
+  
+  bool debug = false;
+  if (argc == 4) {
+    debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
   }
 
   ifstream archivo_instancia;
@@ -208,14 +237,26 @@ int main(long argc, char *argv[]) {
         );
         int influenciaActor = stoi(results[results.size() - 1]);
         int idActor = stoi(results[results.size() - 2]);
-        // Descomentar si se necesita debuggear
-        // cout << "Actor: " << idActor << " - Influencia: " << influenciaActor << endl;
+        // Descomentar en caso de querer printear
+        // if (debug) {
+        //   cout << "Actor: " << idActor << " - Influencia: " << influenciaActor << endl;
+        // }
         actor newActor;
         newActor.id = idActor;
         newActor.influencia = influenciaActor;
-        // TODO - Podríamos sortear acá
-        Actores.push_back(newActor);
-        sumaInfluenciaTotal += newActor.influencia;
+        // TODO - Revisar este sort
+        int i = 0;
+        if (Actores.size() > 0) {
+          for (i; i <= Actores.size() - 1; i += 1) {
+            if (Actores[i].influencia > influenciaActor) {
+              break;
+            } else {
+              continue;
+            }
+          }
+        }
+        Actores.emplace(Actores.begin() + i, newActor);
+        sumaInfluenciaTotal += influenciaActor;
       } else if (linea_instancia[0] == ID_AMISTAD) {
         istringstream iss(linea_instancia);
         vector<std::string> results(
@@ -224,8 +265,10 @@ int main(long argc, char *argv[]) {
         );
         int idActor2 = stoi(results[results.size() - 1]);
         int idActor1 = stoi(results[results.size() - 2]);
-        // Descomentar si se necesita debuggear
-        // cout << "Actor " << idActor1 << " es amigo de Actor " << idActor2 << endl;
+        // Descomentar en caso de querer printear
+        // if (debug) {
+        //   cout << "Actor " << idActor1 << " es amigo de Actor " << idActor2 << endl;
+        // }
         Amistades[idActor1][idActor2] = true;
         Amistades[idActor2][idActor1] = true;
       }
@@ -239,9 +282,10 @@ int main(long argc, char *argv[]) {
     return 1;
   }
 
-  // Descomentar para debugging
-  cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
-  cout << "Procesando..." << endl;
+  if (debug) {
+    cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
+    cout << "Procesando..." << endl;
+  }
 
   // Funcion BT Ej 1
   auto start = chrono::steady_clock::now(); // Empieza el clock
@@ -249,10 +293,13 @@ int main(long argc, char *argv[]) {
   clique res = cliqueMasInfluyenteBT2(*new clique(), Actores, 0, sumaInfluenciaTotal);
   auto end = chrono::steady_clock::now(); // Termina el clock
   double total_time = chrono::duration<double, milli>(end - start).count();
-  // Descomentar para debugging
-  clog << total_time << " ms" << endl;
+  if (debug) {
+    cout << "Influencia: " << res.getInfluencia() << endl;
+    cout << "Tiempo de ejecucion: " << total_time << " ms" << endl;
+  } else {
+    cout << res.getInfluencia() << endl;
+  }
 
-  cout << res.getInfluencia() << endl;
   for (actor a : res.getActores()) {
     cout << a.id << " ";
   }
