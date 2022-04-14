@@ -18,6 +18,7 @@ class clique {
     clique clone();
     vector<actor> getActores();
     clique addActor(actor newActor);
+    clique popActor();
     int setInfluencia(int newInfluencia);
     int getInfluencia();
 };

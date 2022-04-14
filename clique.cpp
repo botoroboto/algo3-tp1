@@ -23,9 +23,10 @@ clique clique::clone() {
   return newClique;
 }
 
-// void clique::popActor() {
-//   this->actores.pop_back();
-// }
+clique clique::popActor() {
+  this->actores.pop_back();
+  return *this;
+}
 
 clique clique::addActor(actor newActor) {
   this->actores.push_back(newActor);
