@@ -3,12 +3,11 @@ const fs = require('fs');
 
 const filePath = './build/Release/algo3-tp1.exe';
 
-// Cambiar esto para usar otras instancias
-const basePathInstancias = './instancias/test';
+const basePathInstancias = process.argv.length > 2 ? process.argv[2] : './instancias/test/';
 let printTimings = '';
 
 fs.readdirSync(basePathInstancias).forEach(instancia => {
-  const stdout = execFileSync(filePath, [`${basePathInstancias}/${instancia}`, 'desc', 'debug'], { encoding: 'utf-8' });
+  const stdout = execFileSync(filePath, [`${basePathInstancias}${instancia}`, 'desc', 'debug'], { encoding: 'utf-8' });
   if (stdout) {
     console.log(stdout);
     const executionTime = stdout.split('Tiempo de ejecucion: ');
