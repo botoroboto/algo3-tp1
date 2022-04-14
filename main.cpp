@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <map>
 #include <vector>
 #include <chrono>
@@ -7,12 +9,12 @@
 
 using namespace std;
 
+int FILE_INDEX = 1;
 int N = 0;
-int N_INDEX = 3;
 int M = 0;
-int M_INDEX = 4;
-string ID_ACTOR = "n";
-string ID_AMISTAD = "e";
+char ID_FIRST_LINE = 'p';
+char ID_ACTOR = 'n';
+char ID_AMISTAD = 'e';
 
 vector<actor> Actores;
 vector<vector<bool>> Amistades;
@@ -169,46 +171,82 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 
 // TODO - Parsear desde un file
 int main(long argc, char *argv[]) {
-  // Funcion BT Ej 1
-  int sumaInfluenciaTotal = 0; // Sumatoria de todas las influencias de todos los actores
-
-  if (argc < 5) {
-    cerr << "Parámetros faltantes: " << endl << "Cantidad de actores y amistades" << endl;
+  if (argc < 1) {
+    cerr << "Parámetro faltante: " << endl << "Path al archivo de instancia." << endl;
     return 1;
   }
 
-  N = stoi(argv[N_INDEX]);
-  M = stoi(argv[M_INDEX]);
+  ifstream archivo_instancia;
+
+  archivo_instancia.open(argv[FILE_INDEX]);
+  string linea_instancia;
+  int sumaInfluenciaTotal = 0; // Sumatoria de todas las influencias de todos los actores
+
+  if (archivo_instancia.is_open()) {
+    while (archivo_instancia.good()) {
+      getline(archivo_instancia, linea_instancia);
+      if (linea_instancia[0] == ID_FIRST_LINE) {
+        istringstream iss(linea_instancia);
+        vector<std::string> results(
+          istream_iterator<std::string>{iss},
+          istream_iterator<std::string>()
+        );
+        M = stoi(results[results.size() - 1]);
+        N = stoi(results[results.size() - 2]);
+        if (N == 0) {
+          break;
+        }
+        Amistades = vector<vector<bool>>(N + 1, vector<bool>(N + 1, false));
+      } else if (linea_instancia[0] == ID_ACTOR) {
+        istringstream iss(linea_instancia);
+        vector<std::string> results(
+          istream_iterator<std::string>{iss},
+          istream_iterator<std::string>()
+        );
+        int influenciaActor = stoi(results[results.size() - 1]);
+        int idActor = stoi(results[results.size() - 2]);
+        // Descomentar si se necesita debuggear
+        // cout << "Actor: " << idActor << " - Influencia: " << influenciaActor << endl;
+        actor newActor;
+        newActor.id = idActor;
+        newActor.influencia = influenciaActor;
+        // TODO - Podríamos sortear acá
+        Actores.push_back(newActor);
+        sumaInfluenciaTotal += newActor.influencia;
+      } else if (linea_instancia[0] == ID_AMISTAD) {
+        istringstream iss(linea_instancia);
+        vector<std::string> results(
+          istream_iterator<std::string>{iss},
+          istream_iterator<std::string>()
+        );
+        int idActor2 = stoi(results[results.size() - 1]);
+        int idActor1 = stoi(results[results.size() - 2]);
+        // Descomentar si se necesita debuggear
+        // cout << "Actor " << idActor1 << " es amigo de Actor " << idActor2 << endl;
+        Amistades[idActor1][idActor2] = true;
+        Amistades[idActor2][idActor1] = true;
+      }
+    }
+  } else {
+    cout << "No se pudo leer el archivo: " << argv[FILE_INDEX] << endl;
+  }
+  
   if (N == 0) {
     cout << "Los actores no pueden ser 0" << endl; 
     return 1;
   }
 
-  Amistades = vector<vector<bool>>(N + 1, vector<bool>(N + 1, false));
+  // Descomentar para debugging
+  // cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
+  // cout << "Procesando..." << endl;
 
-  for (int i = M_INDEX + 1; i < argc; i += 3) {
-    if (argv[i] == ID_ACTOR) {
-      // Descomentar si se necesita debuggear
-      // cout << "Actor: " << stoi(argv[i+1]) << " - Influencia: " << stoi(argv[i+2]) << endl;
-      actor newActor;
-      newActor.id = stoi(argv[i+1]);
-      newActor.influencia = stoi(argv[i+2]);
-      // TODO - Podríamos sortear acá
-      Actores.push_back(newActor);
-      sumaInfluenciaTotal += newActor.influencia;
-    } else if (argv[i] == ID_AMISTAD) {
-      // Descomentar si se necesita debuggear
-      // cout << "Actor " << stoi(argv[i+1]) << " es amigo de Actor " << stoi(argv[i+2]) << endl;
-      Amistades[stoi(argv[i+1])][stoi(argv[i+2])] = true;
-      Amistades[stoi(argv[i+2])][stoi(argv[i+1])] = true;
-    }
-  };
-
+  // Funcion BT Ej 1
   auto start = chrono::steady_clock::now(); // Empieza el clock
   clique res = cliqueMasInfluyenteBT2(*new clique(), Actores, 0, sumaInfluenciaTotal);
   auto end = chrono::steady_clock::now(); // Termina el clock
   double total_time = chrono::duration<double, milli>(end - start).count();
-  clog << total_time << " ms" << endl;
+  // Descomentar para debugging
+  // clog << total_time << " ms" << endl;
 
   cout << res.getInfluencia() << endl;
   for (actor a : res.getActores()) {
