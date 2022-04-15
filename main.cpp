@@ -142,7 +142,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   actorActual.id = actoresRestantes[actorActualIndex].id;
   actorActual.influencia = actoresRestantes[actorActualIndex].influencia;
   actoresRestantes.erase(actoresRestantes.begin() + actorActualIndex);
-  
+
   vector<actor> nuevoVectorDeActoresRestantes = {};
   int nuevaSumaRestante = sumaRestante;
   for (actor a : actoresRestantes) {
