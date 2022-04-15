@@ -7,7 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
-#include "clique.h"
+#include "../../common/clique.h"
 using namespace std;
 
 int FILE_INDEX = 1;
@@ -246,12 +246,14 @@ clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actor
 
 // TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
     if (argc < 1) {
         cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
         return 1;
     }
 
-    if (argc == 3) {
+    if (argc >= 3) {
         if (argv[SORT_INDEX] == SORT_ASCENDING) {
             SORT_FLAG = SORT_ASCENDING;
         } else if (argv[SORT_INDEX] == SORT_DESCENDING) {
@@ -262,7 +264,7 @@ int main(int argc, char *argv[]) {
     SORT_FLAG = SORT_ASCENDING;
 
     bool debug = true;
-    if (argc == 4) {
+    if (argc >= 4) {
         debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
     }
 
@@ -348,7 +350,6 @@ int main(int argc, char *argv[]) {
     // Funcion BT Ej 1
     std::sort(Actores.begin(), Actores.end(), &descComp);
     auto start = chrono::steady_clock::now(); // Empieza el clock
-    // clique res = cliqueMasInfluyenteBT(*new clique(), 0, 0, sumaInfluenciaTotal);
     clique res = cliqueMasInfluyenteConPodaGolosa(*new clique(), Actores, 0, sumaInfluenciaTotal);
     auto end = chrono::steady_clock::now(); // Termina el clock
     double total_time = chrono::duration<double, milli>(end - start).count();
