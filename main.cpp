@@ -6,6 +6,7 @@
 #include <chrono>
 #include <string>
 #include "clique.h"
+#include <iterator>
 
 using namespace std;
 
@@ -31,59 +32,59 @@ bool sonAmigos(actor a1, actor a2) {
 
 int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
 
-// TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
-clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenciaParcial, int sumaRestante) {
-  // Caso base
-  if (actorActual > Actores.size() - 1) {
-    cliqueActual.setInfluencia(influenciaParcial);
-      if (influenciaMax < influenciaParcial) {
-      influenciaMax = influenciaParcial;
-    }
-    return cliqueActual;
-  }
+// // TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
+// clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenciaParcial, int sumaRestante) {
+//   // Caso base
+//   if (actorActual > Actores.size() - 1) {
+//     cliqueActual.setInfluencia(influenciaParcial);
+//       if (influenciaMax < influenciaParcial) {
+//       influenciaMax = influenciaParcial;
+//     }
+//     return cliqueActual;
+//   }
 
-  // Poda de optimalidad
-  if (sumaRestante + influenciaParcial < influenciaMax) {
-    return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
-  }
+//   // Poda de optimalidad
+//   if (sumaRestante + influenciaParcial < influenciaMax) {
+//     return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+//   }
 
-  // Poda de factibilidad
-  bool hayAmistad = true;
-  for (actor a : cliqueActual.getActores()) {
-    if (!sonAmigos(a, Actores[actorActual])) {
-      hayAmistad = false;
-      break;
-    }
-  }
+//   // Poda de factibilidad
+//   bool hayAmistad = true;
+//   for (actor a : cliqueActual.getActores()) {
+//     if (!sonAmigos(a, Actores[actorActual])) {
+//       hayAmistad = false;
+//       break;
+//     }
+//   }
 
-  if (!hayAmistad) {
-    return cliqueMasInfluyenteBT(
-      cliqueActual,
-      actorActual + 1,
-      influenciaParcial,
-      sumaRestante - Actores[actorActual].influencia
-    );
-  }
+//   if (!hayAmistad) {
+//     return cliqueMasInfluyenteBT(
+//       cliqueActual,
+//       actorActual + 1,
+//       influenciaParcial,
+//       sumaRestante - Actores[actorActual].influencia
+//     );
+//   }
 
-  // Agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
-  clique loAgrego = cliqueMasInfluyenteBT(
-    cliqueActual.clone().addActor(Actores[actorActual]),
-    actorActual + 1,
-    influenciaParcial + Actores[actorActual].influencia,
-    sumaRestante - Actores[actorActual].influencia
-  );
+//   // Agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
+//   clique loAgrego = cliqueMasInfluyenteBT(
+//     cliqueActual.clone().addActor(Actores[actorActual]),
+//     actorActual + 1,
+//     influenciaParcial + Actores[actorActual].influencia,
+//     sumaRestante - Actores[actorActual].influencia
+//   );
 
-  // No agrego el actor actual al clique
-  clique noLoAgrego = cliqueMasInfluyenteBT(
-    cliqueActual,
-    actorActual + 1,
-    influenciaParcial,
-    sumaRestante - Actores[actorActual].influencia
-  );
+//   // No agrego el actor actual al clique
+//   clique noLoAgrego = cliqueMasInfluyenteBT(
+//     cliqueActual,
+//     actorActual + 1,
+//     influenciaParcial,
+//     sumaRestante - Actores[actorActual].influencia
+//   );
 
-  // Devuelvo la clique con mas influencia
-  return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego;
-};
+//   // Devuelvo la clique con mas influencia
+//   return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego;
+// };
 
 clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
   // Caso base
@@ -189,7 +190,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 }
 
 // TODO - Parsear desde un file
-int main(long argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   if (argc < 1) {
     cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
     return 1;
