@@ -1,3 +1,11 @@
+/**
+ * El runner se corre desde el root del proyecto, de esta forma:
+ * node ./ejercicios/1/runner.js <pathInstancias> <sortArg>
+ * Donde:
+ *   - pathInstancias, string que indica el directorio con las instancias que se quieren correr
+ *   - sortArg, string que indica el ordenamiento a utilizar (puede ser asc o desc)
+ */
+
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 
