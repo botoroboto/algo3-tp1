@@ -5,8 +5,9 @@
 #include <vector>
 #include <chrono>
 #include <string>
-#include "clique.h"
+#include "../../common/clique.h"
 #include <iterator>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,6 +18,14 @@ string DEBUG_FLAG = "debug";
 string SORT_ASCENDING = "asc";
 string SORT_DESCENDING = "desc";
 string SORT_FLAG = SORT_DESCENDING;
+
+bool actorAsc (const actor& a, const actor& b){
+    return  a.influencia < b.influencia;
+}
+bool actorDesc (const actor& a, const actor& b){
+    return  a.influencia > b.influencia;
+}
+
 int N = 0;
 int M = 0;
 char ID_FIRST_LINE = 'p';
@@ -32,60 +41,7 @@ bool sonAmigos(actor a1, actor a2) {
 
 int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
 
-// // TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
-// clique cliqueMasInfluyenteBT(clique cliqueActual, int actorActual, int influenciaParcial, int sumaRestante) {
-//   // Caso base
-//   if (actorActual > Actores.size() - 1) {
-//     cliqueActual.setInfluencia(influenciaParcial);
-//       if (influenciaMax < influenciaParcial) {
-//       influenciaMax = influenciaParcial;
-//     }
-//     return cliqueActual;
-//   }
-
-//   // Poda de optimalidad
-//   if (sumaRestante + influenciaParcial < influenciaMax) {
-//     return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
-//   }
-
-//   // Poda de factibilidad
-//   bool hayAmistad = true;
-//   for (actor a : cliqueActual.getActores()) {
-//     if (!sonAmigos(a, Actores[actorActual])) {
-//       hayAmistad = false;
-//       break;
-//     }
-//   }
-
-//   if (!hayAmistad) {
-//     return cliqueMasInfluyenteBT(
-//       cliqueActual,
-//       actorActual + 1,
-//       influenciaParcial,
-//       sumaRestante - Actores[actorActual].influencia
-//     );
-//   }
-
-//   // Agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
-//   clique loAgrego = cliqueMasInfluyenteBT(
-//     cliqueActual.clone().addActor(Actores[actorActual]),
-//     actorActual + 1,
-//     influenciaParcial + Actores[actorActual].influencia,
-//     sumaRestante - Actores[actorActual].influencia
-//   );
-
-//   // No agrego el actor actual al clique
-//   clique noLoAgrego = cliqueMasInfluyenteBT(
-//     cliqueActual,
-//     actorActual + 1,
-//     influenciaParcial,
-//     sumaRestante - Actores[actorActual].influencia
-//   );
-
-//   // Devuelvo la clique con mas influencia
-//   return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego;
-// };
-
+// TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
 clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
   // Caso base
   if (actoresRestantes.size() < 1) {
@@ -131,17 +87,9 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   }
 
   actor actorActual;
-  size_t actorActualIndex = actoresRestantes.size() - 1;
-  if (SORT_FLAG == SORT_ASCENDING) {
-    // Para correr de menor a mayor influencia
-    actorActualIndex = 0;
-  } else {
-    // Para correr de mayor a menor influencia
-    actorActualIndex = actoresRestantes.size() - 1;
-  }
-  actorActual.id = actoresRestantes[actorActualIndex].id;
-  actorActual.influencia = actoresRestantes[actorActualIndex].influencia;
-  actoresRestantes.erase(actoresRestantes.begin() + actorActualIndex);
+  actorActual.id = actoresRestantes[0].id;
+  actorActual.influencia = actoresRestantes[0].influencia;
+  actoresRestantes.erase(actoresRestantes.begin() + 0);
 
   vector<actor> nuevoVectorDeActoresRestantes = {};
   int nuevaSumaRestante = sumaRestante;
@@ -191,12 +139,14 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 
 // TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
   if (argc < 1) {
     cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
     return 1;
   }
   
-  if (argc == 3) {
+  if (argc >= 3) {
     if (argv[SORT_INDEX] == SORT_ASCENDING) {
       SORT_FLAG = SORT_ASCENDING;
     } else if (argv[SORT_INDEX] == SORT_DESCENDING) {
@@ -204,8 +154,8 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  bool debug = false;
-  if (argc == 4) {
+  bool debug = true;
+  if (argc >= 4) {
     debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
   }
 
@@ -245,19 +195,9 @@ int main(int argc, char *argv[]) {
         actor newActor;
         newActor.id = idActor;
         newActor.influencia = influenciaActor;
-        // TODO - Revisar este sort
-        int i = 0;
-        if (Actores.size() > 0) {
-          for (i; i <= Actores.size() - 1; i += 1) {
-            if (Actores[i].influencia > influenciaActor) {
-              break;
-            } else {
-              continue;
-            }
-          }
-        }
-        Actores.emplace(Actores.begin() + i, newActor);
+        Actores.push_back(newActor);
         sumaInfluenciaTotal += influenciaActor;
+
       } else if (linea_instancia[0] == ID_AMISTAD) {
         istringstream iss(linea_instancia);
         vector<std::string> results(
@@ -288,9 +228,15 @@ int main(int argc, char *argv[]) {
     cout << "Procesando..." << endl;
   }
 
+  //Sort the actor list;
+  if (SORT_FLAG == SORT_ASCENDING) {
+    sort(Actores.begin(), Actores.end(), &actorAsc);
+  }else{
+    sort(Actores.begin(), Actores.end(), &actorDesc);
+  }
+
   // Funcion BT Ej 1
   auto start = chrono::steady_clock::now(); // Empieza el clock
-  // clique res = cliqueMasInfluyenteBT(*new clique(), 0, 0, sumaInfluenciaTotal);
   clique res = cliqueMasInfluyenteBT2(*new clique(), Actores, 0, sumaInfluenciaTotal);
   auto end = chrono::steady_clock::now(); // Termina el clock
   double total_time = chrono::duration<double, milli>(end - start).count();

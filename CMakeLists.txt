@@ -4,7 +4,8 @@ project(algo3-tp1 VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_executable(algo3-tp1 main.cpp clique.cpp clique.h)
+add_executable(ejercicio1 ./ejercicios/1/main.cpp ./common/clique.cpp ./common/clique.h)
+add_executable(ejercicio2 ./ejercicios/2/main.cpp ./common/clique.cpp ./common/clique.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
