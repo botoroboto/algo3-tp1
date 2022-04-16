@@ -49,7 +49,7 @@ struct ParticionesIndependientes {
 };
 
 ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(vector<actor> actoresPorAgrupar){
-
+    //reverse(actoresPorAgrupar.begin(), actoresPorAgrupar.end());
     vector<grupoIndependiente> gruposIndependientes = {};
     //Generamos el primer grupo con el primer actor
     grupoIndependiente primerGrupo;
@@ -58,7 +58,6 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
     gruposIndependientes.push_back(primerGrupo);
 
     ParticionesIndependientes res;
-    res.influencia = actoresPorAgrupar[0].influencia;
 
     //Elminamos al actor del conjunto de actores restantes por meter en grupos porque ya lo metimos al primer grupo
     actoresPorAgrupar.erase(actoresPorAgrupar.begin());
@@ -68,7 +67,7 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
         grupoIndependiente &grupoActual = gruposIndependientes[i];
 
         //recorremos todos los actoresPorAgrupar restantes para ver si los podemos meter en el grupo actual
-        for(int actorActual = 0; actorActual < actoresPorAgrupar.size(); actorActual++ ){ 
+        for(int actorActual = 0; actorActual < actoresPorAgrupar.size(); actorActual++ ){
             bool independientes = true;
             for(actor &actorIndependiente : grupoActual.actores){
                 //Verificamos que el actor no sea amigo de ninguno del grupo actual  
@@ -85,7 +84,7 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
                 actorActual--;
             }
         }
-
+        res.influencia += grupoActual.influencia;
         if(actoresPorAgrupar.empty()){
             //Si ya no quedan actores ya no hay que partir mas
             break;
@@ -94,7 +93,6 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
         grupoIndependiente nuevoGrupo;
         nuevoGrupo.actores.push_back(actoresPorAgrupar[0]);
         nuevoGrupo.influencia = actoresPorAgrupar[0].influencia;
-        res.influencia += actoresPorAgrupar[0].influencia;
         actoresPorAgrupar.erase(actoresPorAgrupar.begin());
         gruposIndependientes.push_back(nuevoGrupo);
     }
@@ -142,7 +140,7 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
 //    res.gruposIndependientes = gruposIndependientes;
 //    return res;
 //}
-
+ParticionesIndependientes particionesIndependientesGlobal;
 // TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
 clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
     // Caso base
@@ -159,12 +157,33 @@ clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actor
         return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
     }
 
+//    for(grupoIndependiente &grupo : particionesIndependientesGlobal.gruposIndependientes){
+//        bool sigueVivo = false;
+//        for(int a=0; a < grupo.actores.size(); a++) {
+//            for(actor actorRestante : actoresRestantes) {
+//                if (actorRestante.id == grupo.actores[a].id) {
+//                    sigueVivo = true;
+//                    break;
+//                }
+//            }
+//            if(!sigueVivo){
+//                if(grupo.actores.size() == 1){
+//                    grupo.influencia = 0;
+//                }else if(grupo.actores[a].influencia == grupo.influencia){
+//                    grupo.influencia = grupo.actores[a+1].influencia;
+//                }
+//                grupo.actores.erase(grupo.actores.begin() + a);
+//                a--;
+//            }
+//        }
+//    }
+//
     // Poda golosa
-
     int influenciaIndependiente = generarGruposIndependientesMaximizandoActoresPorGrupo(actoresRestantes).influencia;
     if(influenciaParcial + influenciaIndependiente <= influenciaMax ){
         return cliqueActual;
     }
+
 
     bool sonTodosAmigos = false;
 
@@ -344,6 +363,8 @@ int main(int argc, char *argv[]) {
     }else{
         sort(Actores.begin(), Actores.end(), &actorDesc);
     }
+
+    //particionesIndependientesGlobal = generarGruposIndependientesMaximizandoActoresPorGrupo(Actores);
 
     // Funcion BT Con Poda Golosa EJ2
     auto start = chrono::steady_clock::now(); // Empieza el clock
