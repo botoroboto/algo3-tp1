@@ -59,31 +59,34 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
 
   bool sonTodosAmigos = false;
 
-  for (actor a : actoresRestantes) {
-    for (actor a2 : actoresRestantes) {
-      if (a.id < a2.id) {
-        sonTodosAmigos = sonAmigos(a, a2);
-        if (!sonTodosAmigos) {
-          break;
-        }
-      } else {
-        break;
+  for (int a = 0; a > actoresRestantes.size(); a++) {
+      bool esAmigoDeTodos = true;
+      for (actor a2 : actoresRestantes) {
+          if (actoresRestantes[a].id < a2.id) {
+              sonTodosAmigos = sonAmigos(actoresRestantes[a], a2);
+              if (!sonTodosAmigos) {
+                  esAmigoDeTodos = false;
+                  break;
+              }
+          } else {
+              break;
+          }
       }
-    }
-    if (!sonTodosAmigos) {
-      break;
-    }
+      if(esAmigoDeTodos){
+          cliqueActual.addActor(actoresRestantes[a]);
+          influenciaParcial += actoresRestantes[a].influencia;
+          sumaRestante -= actoresRestantes[a].influencia;
+          actoresRestantes.erase(actoresRestantes.begin() + a);
+          a--;
+      }
   }
 
   if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
-    cliqueActual.setInfluencia(sumaRestante + influenciaParcial); // la influencia es toda la que quedaba mas la que ya traía
-    for (actor a : actoresRestantes) {
-      cliqueActual.addActor(a);
-    }
-    if (sumaRestante + influenciaParcial > influenciaMax) {
-      influenciaMax = sumaRestante + influenciaParcial;
-    }
-    return cliqueActual;
+      cliqueActual.setInfluencia(influenciaParcial);
+      if (influenciaParcial > influenciaMax) {
+          influenciaMax = sumaRestante + influenciaParcial;
+      }
+      return cliqueActual;
   }
 
   actor actorActual;
