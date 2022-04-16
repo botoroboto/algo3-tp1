@@ -30,11 +30,12 @@ bool sonAmigos(actor a1, actor a2) {
     return Amistades[a1.id][a2.id];
 };
 
-bool descComp (const actor& a, const actor& b)
-{
+bool actorAsc (const actor& a, const actor& b){
+    return  a.influencia < b.influencia;
+}
+bool actorDesc (const actor& a, const actor& b){
     return  a.influencia > b.influencia;
 }
-
 struct grupoIndependiente {
     vector<actor> actores = {};
     int influencia = 0;
@@ -42,22 +43,23 @@ struct grupoIndependiente {
 
 int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
 
-int obtenerInfluenciaDeGruposIndependientes(vector<grupoIndependiente> grupos){
-    int res = 0;
-    for(grupoIndependiente grupo : grupos){
-        res += grupo.influencia;
-    }
-    return res;
-}
+struct ParticionesIndependientes {
+    vector<grupoIndependiente> gruposIndependientes;
+    int influencia = 0;
+};
 
-vector<grupoIndependiente> generarGruposIndependientesMaximizandoActoresPorGrupo(vector<actor> actoresPorAgrupar){
+ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(vector<actor> actoresPorAgrupar){
+
     vector<grupoIndependiente> gruposIndependientes = {};
     //Generamos el primer grupo con el primer actor
     grupoIndependiente primerGrupo;
     primerGrupo.influencia = actoresPorAgrupar[0].influencia;
     primerGrupo.actores.push_back(actoresPorAgrupar[0]);
-    gruposIndependientes.push_back(primerGrupo);   
-    
+    gruposIndependientes.push_back(primerGrupo);
+
+    ParticionesIndependientes res;
+    res.influencia = actoresPorAgrupar[0].influencia;
+
     //Elminamos al actor del conjunto de actores restantes por meter en grupos porque ya lo metimos al primer grupo
     actoresPorAgrupar.erase(actoresPorAgrupar.begin());
 
@@ -92,157 +94,158 @@ vector<grupoIndependiente> generarGruposIndependientesMaximizandoActoresPorGrupo
         grupoIndependiente nuevoGrupo;
         nuevoGrupo.actores.push_back(actoresPorAgrupar[0]);
         nuevoGrupo.influencia = actoresPorAgrupar[0].influencia;
+        res.influencia += actoresPorAgrupar[0].influencia;
         actoresPorAgrupar.erase(actoresPorAgrupar.begin());
         gruposIndependientes.push_back(nuevoGrupo);
     }
-    return gruposIndependientes;
+
+    res.gruposIndependientes = gruposIndependientes;
+    return res;
 }
 
 //PRIMER APROACH FUNCIONA PERO NO RESPETA LA CONSIGNA
-// vector<grupoIndependiente> generarGruposIndependientesMinimizandoGrupos(vector<actor> actores){
-    
-//     vector<grupoIndependiente> gruposIndependientes = {};
-//     grupoIndependiente primerGrupo;
-//     primerGrupo.influencia = actores[0].influencia;
-//     primerGrupo.actores.push_back(actores[0]);
-//     gruposIndependientes.push_back(primerGrupo);   
+//ParticionesIndependientes generarGruposIndependientesMinimizandoGrupos(vector<actor> actores){
+//
+//    vector<grupoIndependiente> gruposIndependientes = {};
+//    grupoIndependiente primerGrupo;
+//    primerGrupo.influencia = actores[0].influencia;
+//    primerGrupo.actores.push_back(actores[0]);
+//    gruposIndependientes.push_back(primerGrupo);
+//    int actorActual = 1;
+//    int grupoActual = 0;
+//
+//    ParticionesIndependientes res;
+//    res.influencia = actores[0].influencia;
+//
+//    for(actorActual; actorActual < actores.size(); actorActual++ ){
+//
+//        bool sonIndependientes = true;
+//        for(actor actorIndependiente : gruposIndependientes[grupoActual].actores){
+//            if(sonAmigos(actores[actorActual], actorIndependiente)){
+//               sonIndependientes = false;
+//               break;
+//            }
+//        }
+//        if(sonIndependientes){
+//            gruposIndependientes[grupoActual].actores.push_back(actores[actorActual]);
+//            gruposIndependientes[grupoActual].influencia = max(actores[actorActual].influencia, gruposIndependientes[grupoActual].influencia);
+//        }else{
+//            grupoActual++;
+//            grupoIndependiente nuevoGrupo;
+//            nuevoGrupo.actores.push_back(actores[actorActual]);
+//            nuevoGrupo.influencia = actores[actorActual].influencia;
+//            gruposIndependientes.push_back(nuevoGrupo);
+//            res.influencia += actores[actorActual].influencia;
+//        }
+//    }
+//
+//    res.gruposIndependientes = gruposIndependientes;
+//    return res;
+//}
 
-//     int actorActual = 1;
-//     int grupoActual = 0;
-
-//     for(actorActual; actorActual < actores.size(); actorActual++ ){
-
-//         bool sonIndependientes = true;
-//         for(actor actorIndependiente : gruposIndependientes[grupoActual].actores){
-//             if(sonAmigos(actores[actorActual], actorIndependiente)){
-//                sonIndependientes = false;
-//                break;
-//             }
-//         }
-//         if(sonIndependientes){
-//             actoresIndependientes[grupoActual].actores.push_back(actores[actorActual]);
-//             actoresIndependientes[grupoActual].influencia = max(actores[actorActual].influencia, actoresIndependientes[grupoActual].influencia);
-//         }else{
-//             grupoActual++;
-//             grupoIndependiente nuevoGrupo;
-//             nuevoGrupo.actores.push_back(actores[actorActual]);
-//             nuevoGrupo.influencia = actores[actorActual].influencia;
-//             actoresIndependientes[grupoActual].push_back(nuevoGrupo);    
-//         }
-//     }
-
-//     return gruposIndependientes;
-// }
-
+// TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
 clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
-  // Caso base
-  if (actoresRestantes.size() < 1) {
-    cliqueActual.setInfluencia(influenciaParcial);
-    if (influenciaMax < influenciaParcial) {
-      influenciaMax = influenciaParcial;
-    }
-    return cliqueActual;
-  }
-
-  // Poda de optimalidad
-  if (sumaRestante + influenciaParcial <= influenciaMax) {
-    return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
-  }
-
-  // Poda golosa
-  int influenciaIndependiente = obtenerInfluenciaDeGruposIndependientes(generarGruposIndependientesMaximizandoActoresPorGrupo(actoresRestantes));
-  if(influenciaParcial + influenciaIndependiente <= influenciaMax ){
-      return cliqueActual;
-  }
-
-  bool sonTodosAmigos = false;
-
-  for (actor a : actoresRestantes) {
-    for (actor a2 : actoresRestantes) {
-      if (a.id < a2.id) {
-        sonTodosAmigos = sonAmigos(a, a2);
-        if (!sonTodosAmigos) {
-          break;
+    // Caso base
+    if (actoresRestantes.empty()) {
+        cliqueActual.setInfluencia(influenciaParcial);
+        if (influenciaMax < influenciaParcial) {
+            influenciaMax = influenciaParcial;
         }
-      } else {
-        break;
-      }
+        return cliqueActual;
     }
-    if (!sonTodosAmigos) {
-      break;
-    }
-  }
 
-  if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
-    cliqueActual.setInfluencia(sumaRestante + influenciaParcial); // la influencia es toda la que quedaba mas la que ya traía
+    // Poda de optimalidad
+    if (sumaRestante + influenciaParcial <= influenciaMax) {
+        return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+    }
+
+    // Poda golosa
+
+    int influenciaIndependiente = generarGruposIndependientesMaximizandoActoresPorGrupo(actoresRestantes).influencia;
+    if(influenciaParcial + influenciaIndependiente <= influenciaMax ){
+        return cliqueActual;
+    }
+
+    bool sonTodosAmigos = false;
+
     for (actor a : actoresRestantes) {
-      cliqueActual.addActor(a);
+        for (actor a2 : actoresRestantes) {
+            if (a.id < a2.id) {
+                sonTodosAmigos = sonAmigos(a, a2);
+                if (!sonTodosAmigos) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        if (!sonTodosAmigos) {
+            break;
+        }
     }
-    if (sumaRestante + influenciaParcial > influenciaMax) {
-      influenciaMax = sumaRestante + influenciaParcial;
+
+    if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
+        cliqueActual.setInfluencia(sumaRestante + influenciaParcial); // la influencia es toda la que quedaba mas la que ya traía
+        for (actor a : actoresRestantes) {
+            cliqueActual.addActor(a);
+        }
+        if (sumaRestante + influenciaParcial > influenciaMax) {
+            influenciaMax = sumaRestante + influenciaParcial;
+        }
+        return cliqueActual;
     }
-    return cliqueActual;
-  }
 
-  actor actorActual;
-  size_t actorActualIndex = actoresRestantes.size() - 1;
-  if (SORT_FLAG == SORT_ASCENDING) {
-    // Para correr de menor a mayor influencia
-    actorActualIndex = 0;
-  } else {
-    // Para correr de mayor a menor influencia
-    actorActualIndex = actoresRestantes.size() - 1;
-  }
-  actorActual.id = actoresRestantes[actorActualIndex].id;
-  actorActual.influencia = actoresRestantes[actorActualIndex].influencia;
-  actoresRestantes.erase(actoresRestantes.begin() + actorActualIndex);
-  
-  vector<actor> nuevoVectorDeActoresRestantes = {};
-  int nuevaSumaRestante = sumaRestante;
-  for (actor a : actoresRestantes) {
-    if (sonAmigos(a, actorActual)) {
-      actor actorTemporal;
-      actorTemporal.id = a.id;
-      actorTemporal.influencia = a.influencia;
-      nuevoVectorDeActoresRestantes.push_back(actorTemporal);
-    } else {
-      nuevaSumaRestante -= a.influencia;
-      if (nuevaSumaRestante + influenciaParcial < influenciaMax) {
-        break;
-      }
+
+    actor actorActual;
+    actorActual.id = actoresRestantes[0].id;
+    actorActual.influencia = actoresRestantes[0].influencia;
+    actoresRestantes.erase(actoresRestantes.begin() + 0);
+
+    vector<actor> nuevoVectorDeActoresRestantes = {};
+    int nuevaSumaRestante = sumaRestante;
+    for (actor a : actoresRestantes) {
+        if (sonAmigos(a, actorActual)) {
+            actor actorTemporal;
+            actorTemporal.id = a.id;
+            actorTemporal.influencia = a.influencia;
+            nuevoVectorDeActoresRestantes.push_back(actorTemporal);
+        } else {
+            nuevaSumaRestante -= a.influencia;
+            if (nuevaSumaRestante + influenciaParcial < influenciaMax) {
+                break;
+            }
+        }
     }
-  }
 
-  if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // la suma restante todavía tiene al actor actual en cuenta...
-    return cliqueMasInfluyenteConPodaGolosa( // no agrego el actor actual al clique
-      cliqueActual,
-      actoresRestantes,
-      influenciaParcial,
-      sumaRestante - actorActual.influencia
-    ); // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
-  }
+    if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // la suma restante todavía tiene al actor actual en cuenta...
+        return cliqueMasInfluyenteConPodaGolosa( // no agrego el actor actual al clique
+                cliqueActual,
+                actoresRestantes,
+                influenciaParcial,
+                sumaRestante - actorActual.influencia
+        ); // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+    }
 
-  nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
+    nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
 
-  clique loAgrego = cliqueMasInfluyenteConPodaGolosa( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
-    cliqueActual.addActor(actorActual),
-    nuevoVectorDeActoresRestantes,
-    influenciaParcial + actorActual.influencia,
-    nuevaSumaRestante
-  );
+    clique loAgrego = cliqueMasInfluyenteConPodaGolosa( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
+            cliqueActual.addActor(actorActual),
+            nuevoVectorDeActoresRestantes,
+            influenciaParcial + actorActual.influencia,
+            nuevaSumaRestante
+    );
 
-  cliqueActual.popActor();
-  
-  clique noLoAgrego = cliqueMasInfluyenteConPodaGolosa( //no agrego el actor actual al clique
-    cliqueActual,
-    actoresRestantes,
-    influenciaParcial,
-    sumaRestante - actorActual.influencia
-  );
+    cliqueActual.popActor();
 
-  return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
+    clique noLoAgrego = cliqueMasInfluyenteConPodaGolosa( //no agrego el actor actual al clique
+            cliqueActual,
+            actoresRestantes,
+            influenciaParcial,
+            sumaRestante - actorActual.influencia
+    );
+
+    return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
 }
-
 
 // TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
@@ -260,8 +263,6 @@ int main(int argc, char *argv[]) {
             SORT_FLAG = SORT_DESCENDING;
         }
     }
-
-    SORT_FLAG = SORT_ASCENDING;
 
     bool debug = true;
     if (argc >= 4) {
@@ -304,19 +305,9 @@ int main(int argc, char *argv[]) {
                 actor newActor;
                 newActor.id = idActor;
                 newActor.influencia = influenciaActor;
-                // TODO - Revisar este sort
-                int i = 0;
-                if (Actores.size() > 0) {
-                    for (i; i <= Actores.size() - 1; i += 1) {
-                        if (Actores[i].influencia > influenciaActor) {
-                            break;
-                        } else {
-                            continue;
-                        }
-                    }
-                }
-                Actores.emplace(Actores.begin() + i, newActor);
+                Actores.push_back(newActor);
                 sumaInfluenciaTotal += influenciaActor;
+
             } else if (linea_instancia[0] == ID_AMISTAD) {
                 istringstream iss(linea_instancia);
                 vector<std::string> results(
@@ -347,8 +338,14 @@ int main(int argc, char *argv[]) {
         cout << "Procesando..." << endl;
     }
 
-    // Funcion BT Ej 1
-    std::sort(Actores.begin(), Actores.end(), &descComp);
+    //Sort the actor list;
+    if (SORT_FLAG == SORT_ASCENDING) {
+        sort(Actores.begin(), Actores.end(), &actorAsc);
+    }else{
+        sort(Actores.begin(), Actores.end(), &actorDesc);
+    }
+
+    // Funcion BT Con Poda Golosa EJ2
     auto start = chrono::steady_clock::now(); // Empieza el clock
     clique res = cliqueMasInfluyenteConPodaGolosa(*new clique(), Actores, 0, sumaInfluenciaTotal);
     auto end = chrono::steady_clock::now(); // Termina el clock

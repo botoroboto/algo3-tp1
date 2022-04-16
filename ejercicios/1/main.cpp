@@ -7,6 +7,7 @@
 #include <string>
 #include "../../common/clique.h"
 #include <iterator>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,6 +18,14 @@ string DEBUG_FLAG = "debug";
 string SORT_ASCENDING = "asc";
 string SORT_DESCENDING = "desc";
 string SORT_FLAG = SORT_DESCENDING;
+
+bool actorAsc (const actor& a, const actor& b){
+    return  a.influencia < b.influencia;
+}
+bool actorDesc (const actor& a, const actor& b){
+    return  a.influencia > b.influencia;
+}
+
 int N = 0;
 int M = 0;
 char ID_FIRST_LINE = 'p';
@@ -78,17 +87,9 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
   }
 
   actor actorActual;
-  size_t actorActualIndex = actoresRestantes.size() - 1;
-  if (SORT_FLAG == SORT_ASCENDING) {
-    // Para correr de menor a mayor influencia
-    actorActualIndex = 0;
-  } else {
-    // Para correr de mayor a menor influencia
-    actorActualIndex = actoresRestantes.size() - 1;
-  }
-  actorActual.id = actoresRestantes[actorActualIndex].id;
-  actorActual.influencia = actoresRestantes[actorActualIndex].influencia;
-  actoresRestantes.erase(actoresRestantes.begin() + actorActualIndex);
+  actorActual.id = actoresRestantes[0].id;
+  actorActual.influencia = actoresRestantes[0].influencia;
+  actoresRestantes.erase(actoresRestantes.begin() + 0);
 
   vector<actor> nuevoVectorDeActoresRestantes = {};
   int nuevaSumaRestante = sumaRestante;
@@ -153,7 +154,7 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  bool debug = false;
+  bool debug = true;
   if (argc >= 4) {
     debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
   }
@@ -194,19 +195,9 @@ int main(int argc, char *argv[]) {
         actor newActor;
         newActor.id = idActor;
         newActor.influencia = influenciaActor;
-        // TODO - Revisar este sort
-        int i = 0;
-        if (Actores.size() > 0) {
-          for (i; i <= Actores.size() - 1; i += 1) {
-            if (Actores[i].influencia > influenciaActor) {
-              break;
-            } else {
-              continue;
-            }
-          }
-        }
-        Actores.emplace(Actores.begin() + i, newActor);
+        Actores.push_back(newActor);
         sumaInfluenciaTotal += influenciaActor;
+
       } else if (linea_instancia[0] == ID_AMISTAD) {
         istringstream iss(linea_instancia);
         vector<std::string> results(
@@ -235,6 +226,13 @@ int main(int argc, char *argv[]) {
   if (debug) {
     cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
     cout << "Procesando..." << endl;
+  }
+
+  //Sort the actor list;
+  if (SORT_FLAG == SORT_ASCENDING) {
+    sort(Actores.begin(), Actores.end(), &actorAsc);
+  }else{
+    sort(Actores.begin(), Actores.end(), &actorDesc);
   }
 
   // Funcion BT Ej 1
