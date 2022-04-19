@@ -18,7 +18,6 @@ vector<int> S = {};  // tiempo inicio
 vector<int> T = {};  // tiempo fin
 vector<int> B = {};  //beneficio
 const int UNDEFINED_VALUE = -1;
-vector<int> MA(N+1, UNDEFINED_VALUE);
 
 struct actividad {
     int s;
@@ -29,7 +28,13 @@ struct resultado {
     vector<actividad> actividades = {};
 };
 resultado undefinedValue;
-vector<vector<resultado>> M(N + 1, vector<resultado>(2*N + 1, undefinedValue));
+
+vector<int> reconstruccion_2(vector<vector<int>> MA) {
+    vector<int> res = {};
+
+
+    return res;
+}
 
 vector<int> reconstruccion(vector<int> MA) {
     vector<int> res = {};
@@ -44,6 +49,17 @@ vector<int> reconstruccion(vector<int> MA) {
     }
 
     return res;
+}
+
+int b_BOTTOM_UP_2(int i) {
+    int ultimoS = UNDEFINED_VALUE;
+    vector<vector<int>> M_BOTTOM_UP(N + 1, vector<int>(2*N + 1, UNDEFINED_VALUE));
+
+    for (int j = N-1; j >= 0; --j) {
+
+    }
+
+    return 0;
 }
 
 int b_BOTTOM_UP(int i) {
@@ -66,6 +82,7 @@ int b_BOTTOM_UP(int i) {
         }
 
         if (ponerJesOptimo) {
+            cout << "agarre al " << j<< endl;
             ultimoS = S[j];
             M_BOTTOM_UP[j] = ultimo + B[j];
         }else {
@@ -76,28 +93,31 @@ int b_BOTTOM_UP(int i) {
     return M_BOTTOM_UP[N-i];
 }
 
+int b_TOP_DOWN_2(int i, int ultimoT, vector<vector<int>> &MA) {
+    int position = ultimoT;
+    if (position == -1) {
+        position = 0;
+    }
 
-
-int b_TOP_DOWN_2(int i, int ultimoT) {
     if (i==N) {
-        MA[i] = 0;
+        MA[i][position] = 0;
     } else {
         if (ultimoT>=S[i]) {
-            MA[i] = b_TOP_DOWN_2(i+1, ultimoT);
-        } else if (MA[i] == UNDEFINED_VALUE) {
-            int loAgrego =  b_TOP_DOWN_2(i+1, T[i]) + B[i];
-            int noLoAgrego = b_TOP_DOWN_2(i+1, ultimoT);
+            MA[i][position] = b_TOP_DOWN_2(i+1, ultimoT, MA);
+        } else {
+            int loAgrego =  b_TOP_DOWN_2(i+1, T[i], MA) + B[i];
+            int noLoAgrego = b_TOP_DOWN_2(i+1, ultimoT, MA);
 
-            MA[i] = max(loAgrego, noLoAgrego);
+            MA[i][position] = max(loAgrego, noLoAgrego);
         }
     }
 
-    return MA[i];
+    return MA[i][position];
 }
 
-resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas) {
+resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas, vector<vector<resultado>> M) {
     int ultimoT = 0;
-    if (actividadesAlcanzadas.size() != 0) {
+    if (!actividadesAlcanzadas.empty()) {
         ultimoT = actividadesAlcanzadas[actividadesAlcanzadas.size() - 1].t;
     }
 
@@ -108,15 +128,15 @@ resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas) {
         M[i][ultimoT] = base;
     } else {
         if (ultimoT>=S[i]) {
-            M[i][ultimoT] = b_TOP_DOWN(i+1, actividadesAlcanzadas);
+            M[i][ultimoT] = b_TOP_DOWN(i+1, actividadesAlcanzadas, M);
         }else if (M[i][ultimoT].res == undefinedValue.res) {
             actividad nueva;
             nueva.s = S[i];
             nueva.t = T[i];
-            resultado agregandolo = b_TOP_DOWN(i+1, actividadesAlcanzadas);
+            resultado agregandolo = b_TOP_DOWN(i+1, actividadesAlcanzadas, M);
             vector<actividad> copia = actividadesAlcanzadas;
             copia.push_back(nueva);
-            resultado noAgregandolo = b_TOP_DOWN(i+1, copia);
+            resultado noAgregandolo = b_TOP_DOWN(i+1, copia, M);
             noAgregandolo.res = noAgregandolo.res + B[i];
             if (noAgregandolo.res > agregandolo.res) {
                 M[i][ultimoT] = noAgregandolo;
@@ -129,12 +149,12 @@ resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas) {
     return M[i][ultimoT];
 }
 
-void printMatriz(std::vector<std::vector<resultado> > m) {
+void printMatriz(std::vector<std::vector<int> > m) {
     for( int i=0; i<m.size() ; i++)
     {
         for( int j=0; j<m[0].size(); j++)
         {
-            std::cout<<m[i][j].res<<"   ";
+            std::cout<<m[i][j]<<"   ";
         }
         std::cout<<std::endl;
     }
@@ -204,13 +224,17 @@ ios::sync_with_stdio(false);
     auto end = chrono::steady_clock::now(); // Termina el clock
     double total_time = chrono::duration<double, milli>(end - start).count();
     vector<actividad> inicial= {};
-    // resultado res = b_TOP_DOWN(0, inicial);
-    // cout << res.res << endl;
+    vector<vector<resultado>> M(N + 1, vector<resultado>(2*N + 1, undefinedValue));
+    vector<vector<int>> MA(N + 1, vector<int>(2*N + 1, UNDEFINED_VALUE));
+    //resultado res = b_TOP_DOWN(0, inicial, M);
+    //cout << res.res << endl;
 
-    int a = b_TOP_DOWN_2(0, 0);
+    int a = b_TOP_DOWN_2(0, 0, MA);
     cout << a << " TOP DOWN" << endl;
 
-    vector<int> e = reconstruccion(MA);
+    printMatriz(MA);
+
+    vector<int> e = reconstruccion_2(MA);
     cout  << "--reconstruccion--"<< endl;
 
     for (int i = 0; i < e.size(); ++i) {
@@ -218,8 +242,8 @@ ios::sync_with_stdio(false);
     }
     cout  << "-----------"<< endl;
 
-    int bottomUp = b_BOTTOM_UP(N);
-    cout << bottomUp << " BOTTOM UP"<< endl;
+//    int bottomUp = b_BOTTOM_UP(N);
+//    cout << bottomUp << " BOTTOM UP"<< endl;
 
     // for (int i = 0; i < res.actividades.size(); ++i) {
        // cout << "S: " << res.actividades[i].s << "  T: " << res.actividades[i].t << endl;
