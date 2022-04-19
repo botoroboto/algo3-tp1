@@ -1,16 +1,17 @@
 // implementation of radix sort using bin/bucket sort
 #include <bits/stdc++.h>
+#include "../../common/actividad.h"
 using namespace std;
 
 // structure for a single linked list to help further in the
 // sorting
 struct node {
-    pair<pair<int, int>, int> data;
+    pair<actividad, int> data;
     node* next;
 };
 
 // function for creating a new node in the linked list
-struct node* create(pair<pair<int, int>, int> x)
+struct node* create(pair<actividad, int> x)
 {
     node* temp = new node();
     temp->data = x;
@@ -22,7 +23,7 @@ struct node* create(pair<pair<int, int>, int> x)
 // utility function to append node in the linked list
 // here head is passed by reference, to know more about this
 // search pass by reference
-void insert(node*& head, pair<pair<int, int>, int> n)
+void insert(node*& head, pair<actividad, int> n)
 {
     if (head == NULL) {
         head = create(n);
@@ -37,13 +38,13 @@ void insert(node*& head, pair<pair<int, int>, int> n)
 
 // utility function to pop an element from front in the list
 // for the sake of stability in sorting
-pair<pair<int, int>, int> del(node*& head)
+pair<actividad, int> del(node*& head)
 {
     if (head == NULL)
-        return make_pair(make_pair(0, 0), 0);
+        return make_pair(actividad(), 0);
     node* temp = head;
     // storing the value of head before updating
-    pair<pair<int, int>, int> val = head->data;
+    pair<actividad, int> val = head->data;
 
     // updation of head to next node
     head = head->next;
@@ -65,17 +66,17 @@ int digits(int n)
     return i;
 }
 
-vector<pair<pair<int, int>, int>> radix_sort_modificado(vector<pair<int, int>>& arr)
+vector<pair<actividad, int>> radix_sort_modificado(vector<actividad>& arr)
 {
     // size of the array to be sorted
     int sz = arr.size();
-    vector<pair<pair<int, int>, int>> res;
+    vector<pair<actividad, int>> res;
 
     // getting the maximum element in the array
     int max_element = 0;
-    for (pair<int, int> element : arr) {
-        if(max_element < element.second){
-            max_element = element.second;
+    for (actividad element : arr) {
+        if(max_element < element.t){
+            max_element = element.t;
         }
     }
 
@@ -101,7 +102,7 @@ vector<pair<pair<int, int>, int>> radix_sort_modificado(vector<pair<int, int>>& 
     // of array in the linked list by their digits value
     for (int i = 0; i < d; i++) {
         for (int j = 0; j < sz; j++) // bins updation
-            insert(bins[(arr[j].second / (int)pow(10, i)) % 10],
+            insert(bins[(arr[j].t / (int)pow(10, i)) % 10],
                    make_pair(arr[j], j));
 
         int x = 0, y = 0;
