@@ -50,6 +50,8 @@ struct ParticionesIndependientes {
 
 
 ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(vector<actor> actoresPorAgrupar){
+    ParticionesIndependientes res;
+
     //reverse(actoresPorAgrupar.begin(), actoresPorAgrupar.end());
     vector<grupoIndependiente> gruposIndependientes = {};
     //Generamos el primer grupo con el primer actor
@@ -57,8 +59,6 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
     primerGrupo.influencia = actoresPorAgrupar[0].influencia;
     primerGrupo.actores.push_back(actoresPorAgrupar[0]);
     gruposIndependientes.push_back(primerGrupo);
-
-    ParticionesIndependientes res;
 
     //Elminamos al actor del conjunto de actores restantes por meter en grupos porque ya lo metimos al primer grupo
     actoresPorAgrupar.erase(actoresPorAgrupar.begin());
