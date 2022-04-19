@@ -18,6 +18,9 @@ vector<int> S = {};  // tiempo inicio
 vector<int> T = {};  // tiempo fin
 vector<int> B = {};  //beneficio
 const int UNDEFINED_VALUE = -1;
+vector<int> memoization = {};
+vector<int> ordenadosPorFinalizacion = {};
+vector<int> actividadSiguiente = {};
 
 struct actividad {
     int s;
@@ -93,26 +96,64 @@ int b_BOTTOM_UP(int i) {
     return M_BOTTOM_UP[N-i];
 }
 
-int b_TOP_DOWN_2(int i, int ultimoT, vector<vector<int>> &MA) {
-    int position = ultimoT;
-    if (position == -1) {
-        position = 0;
+vector<int> computaActividadesSiguientes() {
+    int size = 2*N;
+    vector<int> res;
+    vector<int> tiemposDeInicio(size, UNDEFINED_VALUE);
+    vector<int> tiemposDeFinalizacion(size, UNDEFINED_VALUE);
+    vector<int> ordenadoPorFinalizacion(N, UNDEFINED_VALUE);
+    vector<int> ordenadoPorInicio(N, UNDEFINED_VALUE);
+
+    for (int i = 0; i < N; ++i) {
+        tiemposDeInicio[S[i] - 1] = i;
+        tiemposDeFinalizacion[T[i] - 1] = i;
     }
 
-    if (i==N) {
-        MA[i][position] = 0;
-    } else {
-        if (ultimoT>=S[i]) {
-            MA[i][position] = b_TOP_DOWN_2(i+1, ultimoT, MA);
-        } else {
-            int loAgrego =  b_TOP_DOWN_2(i+1, T[i], MA) + B[i];
-            int noLoAgrego = b_TOP_DOWN_2(i+1, ultimoT, MA);
+    for (int i = 0; i < size; ++i) {
+        if (tiemposDeInicio[i] != UNDEFINED_VALUE) {
+            ordenadoPorInicio.push_back(tiemposDeInicio[i]);
+        }
 
-            MA[i][position] = max(loAgrego, noLoAgrego);
+        if (tiemposDeFinalizacion[i] != UNDEFINED_VALUE) {
+            ordenadoPorFinalizacion.push_back(tiemposDeFinalizacion[i]);
         }
     }
 
-    return MA[i][position];
+
+
+
+
+
+//
+//    int ultimoQueAgregue = -1;
+//    int ultimaActividad = tiemposDeFinalizacion[0];
+//    for (int i = 0; i < size; ++i) {
+//        if (tiemposDeFinalizacion[i] != UNDEFINED_VALUE) {
+//            ultimaActividad = tiemposDeFinalizacion[i];
+//        }
+//
+//        if (tiemposDeInicio[i] != UNDEFINED_VALUE) {
+//            if (ultimoQueAgregue != ultimaActividad) {
+//                res.push_back(ultimaActividad);
+//                ultimoQueAgregue = ultimaActividad;
+//            }
+//        }
+//    }
+
+    return res;
+}
+
+int b_TOP_DOWN_2(int i) {
+    if (i==N) {
+        memoization[i] = 0;
+    } else if (memoization[i] != UNDEFINED_VALUE ) {
+        int loAgrego =  b_TOP_DOWN_2(actividadSiguiente[i]) + B[i];
+        int noLoAgrego = b_TOP_DOWN_2(i+1);
+
+        memoization[i] = max(loAgrego, noLoAgrego);
+    }
+
+    return memoization[i];
 }
 
 resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas, vector<vector<resultado>> M) {
@@ -225,22 +266,27 @@ ios::sync_with_stdio(false);
     double total_time = chrono::duration<double, milli>(end - start).count();
     vector<actividad> inicial= {};
     vector<vector<resultado>> M(N + 1, vector<resultado>(2*N + 1, undefinedValue));
-    vector<vector<int>> MA(N + 1, vector<int>(2*N + 1, UNDEFINED_VALUE));
+    memoization.resize(N, UNDEFINED_VALUE);
+    actividadSiguiente.resize(2*N, UNDEFINED_VALUE);
+
+    vector<int> siguientes = computaActividadesSiguientes();
+
     //resultado res = b_TOP_DOWN(0, inicial, M);
     //cout << res.res << endl;
 
-    int a = b_TOP_DOWN_2(0, 0, MA);
+    int a = b_TOP_DOWN_2(0);
     cout << a << " TOP DOWN" << endl;
 
-    printMatriz(MA);
-
-    vector<int> e = reconstruccion_2(MA);
-    cout  << "--reconstruccion--"<< endl;
-
-    for (int i = 0; i < e.size(); ++i) {
-        cout << e[i] << endl;
-    }
-    cout  << "-----------"<< endl;
+//
+//    printMatriz(MA);
+//
+//    vector<int> e = reconstruccion_2(MA);
+//    cout  << "--reconstruccion--"<< endl;
+//
+//    for (int i = 0; i < e.size(); ++i) {
+//        cout << e[i] << endl;
+//    }
+//    cout  << "-----------"<< endl;
 
 //    int bottomUp = b_BOTTOM_UP(N);
 //    cout << bottomUp << " BOTTOM UP"<< endl;
