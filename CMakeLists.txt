@@ -6,6 +6,7 @@ enable_testing()
 
 add_executable(ejercicio1 ./ejercicios/1/main.cpp ./common/clique.cpp ./common/clique.h)
 add_executable(ejercicio2 ./ejercicios/2/main.cpp ./common/clique.cpp ./common/clique.h)
+add_executable(ejercicio3 ./ejercicios/3/main.cpp ./common/clique.cpp ./common/clique.h)
 add_executable(ejercicio4 ./ejercicios/4/main.cpp ejercicios/4/radix_sort.cpp ejercicios/4/radix_sort.h common/actividad.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
