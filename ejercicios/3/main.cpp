@@ -59,77 +59,45 @@ vector<int> generarVectorDeSiguienteActividad(){
     return res;
 }
 
-
-vector<int> reconstruccion_2(vector<vector<int>> MA) {
-    vector<int> res = {};
-
-
-    return res;
-}
-
-vector<int> reconstruccion(vector<int> MA) {
-    vector<int> res = {};
-    for (int i = 0; i < MA.size() - 1; ++i) {
-        if (MA[i] - MA[i+1] != 0) {
-            res.push_back(i);
-        }
-    }
-
-    if (MA[MA.size() -1] != 0){
-        res.push_back(MA.size() -1);
+vector<int> reconstruccion(int j, vector<int> &res) {
+    if (j==N) {
+        return {};
+    }else if(ordenadoPorInicio[j].beneficio + memoization[actividadSiguiente[j]] > memoization[j+1]) {
+        res.push_back(j);
+        cout << j <<  "DA" << endl;
+        reconstruccion(actividadSiguiente[j], res);
+    } else {
+        reconstruccion(j + 1, res);
     }
 
     return res;
+
+//    vector<int> res = {};
+//    for (int i = memoization.size() - 1; i > 0; --i) {
+//        int dif = memoization[i] - memoization[i-1];
+//        if (dif != 0) {
+//            res.push_back(i+1);
+//        }
+//    }
+
 }
 
-int b_BOTTOM_UP_2(int i) {
-    int ultimoS = UNDEFINED_VALUE;
-    vector<vector<int>> M_BOTTOM_UP(N + 1, vector<int>(2*N + 1, UNDEFINED_VALUE));
+int b_BOTTOM_UP() {
+    memoization[N] = 0;
 
-    for (int j = N-1; j >= 0; --j) {
-
+    for (int j=N-1; j >= 0; j--) {
+        memoization[j] = max(ordenadoPorInicio[j].beneficio + memoization[actividadSiguiente[j]], memoization[j+1]);
     }
 
-    return 0;
+    return memoization[0];
 }
 
-int b_BOTTOM_UP(int i) {
-    int ultimoS = UNDEFINED_VALUE;
-    vector<int> M_BOTTOM_UP(N, 0);
-    for (int j = N-1; j >= 0; --j) {
-        bool ponerJesOptimo = ultimoS == UNDEFINED_VALUE || ultimoS > T[j];
-        int k = j - 1;
-        int ultimo = 0;
-        if (j != N-1) {
-            ultimo = M_BOTTOM_UP[j+1];
-        }
-        if (ponerJesOptimo){
-            while (k > 0 && T[k] > S[j] && ponerJesOptimo) {
-                if (ultimo + B[k] > ultimo + B[j]) {
-                    ponerJesOptimo = false;
-                }
-                k--;
-            }
-        }
-
-        if (ponerJesOptimo) {
-            cout << "agarre al " << j<< endl;
-            ultimoS = S[j];
-            M_BOTTOM_UP[j] = ultimo + B[j];
-        }else {
-            M_BOTTOM_UP[j] = ultimo;
-        }
-    }
-
-    return M_BOTTOM_UP[N-i];
-}
-
-int b_TOP_DOWN_2(int i) {
+int b_TOP_DOWN(int i) {
     if (i==N) {
         memoization[i] = 0;
     } else if (memoization[i] == UNDEFINED_VALUE ) {
-        int loAgrego =  b_TOP_DOWN_2(actividadSiguiente[i]) + B[i];
-        int noLoAgrego = b_TOP_DOWN_2(i + 1);
+        int loAgrego =  b_TOP_DOWN(actividadSiguiente[i]) + B[i];
+        int noLoAgrego = b_TOP_DOWN(i + 1);
 
         memoization[i] = max(loAgrego, noLoAgrego);
     }
@@ -214,8 +182,17 @@ int main(int argc, char *argv[]) {
 
     actividadSiguiente = generarVectorDeSiguienteActividad();
 
-    int a = b_TOP_DOWN_2(0);
+    int a = b_TOP_DOWN(0);
     cout << a << " TOP DOWN" << endl;
+
+    // int bottomUp = b_BOTTOM_UP();
+    // cout << bottomUp << " Bottom Up" << endl;
+    for (int i = 0; i < memoization.size(); ++i) {
+        cout << memoization[i] <<endl;
+    }
+
+    vector<int> res = {};
+    vector<int> r = reconstruccion(0, res);
 
     cout << "Tiempo de ejecucion: " << total_time << " ms" << endl;
 
