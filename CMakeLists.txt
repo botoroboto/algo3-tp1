@@ -7,7 +7,7 @@ enable_testing()
 add_executable(ejercicio1 ./ejercicios/1/main.cpp ./common/clique.cpp ./common/clique.h)
 add_executable(ejercicio2 ./ejercicios/2/main.cpp ./common/clique.cpp ./common/clique.h)
 add_executable(ejercicio3 ./ejercicios/3/main.cpp ./common/clique.cpp ./common/clique.h)
-add_executable(ejercicio4 ./ejercicios/4/main.cpp common/actividad.h)
+add_executable(ejercicio4 ./ejercicios/4/main.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
