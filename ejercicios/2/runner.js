@@ -15,10 +15,6 @@ const timeoutPorInstancia = 600000;
 let printTimings = '';
 
 fs.readdirSync(basePathInstancias).forEach(instancia => {
-  if (instancia === "brock400_2.clq") {
-    console.log("skip instance", instancia);
-    return;
-  }
   try {
     const stdout = execFileSync(
       filePath,
