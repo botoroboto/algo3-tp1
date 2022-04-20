@@ -19,18 +19,46 @@ vector<int> T = {};  // tiempo fin
 vector<int> B = {};  //beneficio
 const int UNDEFINED_VALUE = -1;
 vector<int> memoization = {};
-vector<int> ordenadosPorFinalizacion = {};
-vector<int> actividadSiguiente = {};
+vector<int> actividadSiguiente;
 
 struct actividad {
-    int s;
-    int t;
+    int inicio;
+    int fin;
+    int beneficio;
+};
+struct actividadConIndice{
+    actividad tarea;
+    int index;
 };
 struct resultado {
     int res = -1;
     vector<actividad> actividades = {};
 };
 resultado undefinedValue;
+
+vector<actividad> ordenadoPorInicio = {};
+vector<actividadConIndice> ordenadoPorFin= {};
+vector<int> generarVectorDeSiguienteActividad(){
+    vector<int> res(N , N);
+    int inicio = 0;
+    int fin = 0;
+    while(inicio<N || fin<N){
+        if(inicio==N){
+            while(fin<N) {
+                res[ordenadoPorFin[fin].index] = N;
+                fin++;
+            }
+        }
+        else if(ordenadoPorInicio[inicio].inicio <= ordenadoPorFin[fin].tarea.fin){
+            inicio++;
+        }else{
+            res[ordenadoPorFin[fin].index] = inicio;
+            fin++;
+        }
+    }
+    return res;
+}
+
 
 vector<int> reconstruccion_2(vector<vector<int>> MA) {
     vector<int> res = {};
@@ -96,59 +124,12 @@ int b_BOTTOM_UP(int i) {
     return M_BOTTOM_UP[N-i];
 }
 
-vector<int> computaActividadesSiguientes() {
-    int size = 2*N;
-    vector<int> res;
-    vector<int> tiemposDeInicio(size, UNDEFINED_VALUE);
-    vector<int> tiemposDeFinalizacion(size, UNDEFINED_VALUE);
-    vector<int> ordenadoPorFinalizacion(N, UNDEFINED_VALUE);
-    vector<int> ordenadoPorInicio(N, UNDEFINED_VALUE);
-
-    for (int i = 0; i < N; ++i) {
-        tiemposDeInicio[S[i] - 1] = i;
-        tiemposDeFinalizacion[T[i] - 1] = i;
-    }
-
-    for (int i = 0; i < size; ++i) {
-        if (tiemposDeInicio[i] != UNDEFINED_VALUE) {
-            ordenadoPorInicio.push_back(tiemposDeInicio[i]);
-        }
-
-        if (tiemposDeFinalizacion[i] != UNDEFINED_VALUE) {
-            ordenadoPorFinalizacion.push_back(tiemposDeFinalizacion[i]);
-        }
-    }
-
-
-
-
-
-
-//
-//    int ultimoQueAgregue = -1;
-//    int ultimaActividad = tiemposDeFinalizacion[0];
-//    for (int i = 0; i < size; ++i) {
-//        if (tiemposDeFinalizacion[i] != UNDEFINED_VALUE) {
-//            ultimaActividad = tiemposDeFinalizacion[i];
-//        }
-//
-//        if (tiemposDeInicio[i] != UNDEFINED_VALUE) {
-//            if (ultimoQueAgregue != ultimaActividad) {
-//                res.push_back(ultimaActividad);
-//                ultimoQueAgregue = ultimaActividad;
-//            }
-//        }
-//    }
-
-    return res;
-}
-
 int b_TOP_DOWN_2(int i) {
     if (i==N) {
         memoization[i] = 0;
-    } else if (memoization[i] != UNDEFINED_VALUE ) {
+    } else if (memoization[i] == UNDEFINED_VALUE ) {
         int loAgrego =  b_TOP_DOWN_2(actividadSiguiente[i]) + B[i];
-        int noLoAgrego = b_TOP_DOWN_2(i+1);
+        int noLoAgrego = b_TOP_DOWN_2(i + 1);
 
         memoization[i] = max(loAgrego, noLoAgrego);
     }
@@ -156,57 +137,11 @@ int b_TOP_DOWN_2(int i) {
     return memoization[i];
 }
 
-resultado b_TOP_DOWN(int i, vector<actividad> actividadesAlcanzadas, vector<vector<resultado>> M) {
-    int ultimoT = 0;
-    if (!actividadesAlcanzadas.empty()) {
-        ultimoT = actividadesAlcanzadas[actividadesAlcanzadas.size() - 1].t;
-    }
-
-    if (i==N) {
-        resultado base;
-        base.res = 0;
-        base.actividades = actividadesAlcanzadas;
-        M[i][ultimoT] = base;
-    } else {
-        if (ultimoT>=S[i]) {
-            M[i][ultimoT] = b_TOP_DOWN(i+1, actividadesAlcanzadas, M);
-        }else if (M[i][ultimoT].res == undefinedValue.res) {
-            actividad nueva;
-            nueva.s = S[i];
-            nueva.t = T[i];
-            resultado agregandolo = b_TOP_DOWN(i+1, actividadesAlcanzadas, M);
-            vector<actividad> copia = actividadesAlcanzadas;
-            copia.push_back(nueva);
-            resultado noAgregandolo = b_TOP_DOWN(i+1, copia, M);
-            noAgregandolo.res = noAgregandolo.res + B[i];
-            if (noAgregandolo.res > agregandolo.res) {
-                M[i][ultimoT] = noAgregandolo;
-            }else {
-                M[i][ultimoT] = agregandolo;
-            }
-        }
-    }
-
-    return M[i][ultimoT];
-}
-
-void printMatriz(std::vector<std::vector<int> > m) {
-    for( int i=0; i<m.size() ; i++)
-    {
-        for( int j=0; j<m[0].size(); j++)
-        {
-            std::cout<<m[i][j]<<"   ";
-        }
-        std::cout<<std::endl;
-    }
-    std::cout<<std::endl;
-    std::cout<<std::endl;
-}
 
 // TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
 
-ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(0);
     if (argc < 1) {
         cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
@@ -227,19 +162,37 @@ ios::sync_with_stdio(false);
             S.resize(N);
             T.resize(N);
             int i = 1;
+
+            actividad actividadDummy;
             while (archivo_instancia >> number) {
                 if (i % 3 == 0) {
                     B[(i/3) - 1] = number;
+                    actividadDummy.beneficio = number;
+                    ordenadoPorInicio.push_back(actividadDummy);
                 } else if (i % 3 == 2) {
                     T[i/3] = number;
+                    actividadDummy.fin = number;
                 }else {
                     S[i/3] = number;
+                    actividadDummy.inicio = number;
                 }
                 i++;
             }
             archivo_instancia.close();
-        }}
-
+        }
+    }
+    vector<vector<actividadConIndice>> buckets(2*N + 1, vector<actividadConIndice> {});
+    for(int a = 0;  a < ordenadoPorInicio.size(); a++){
+        actividadConIndice dummy;
+        dummy.tarea = ordenadoPorInicio[a];
+        dummy.index = a;
+        buckets[ordenadoPorInicio[a].fin].push_back(dummy);
+    }
+    for(vector<actividadConIndice> bucket : buckets){
+        for(actividadConIndice a : bucket){
+            ordenadoPorFin.push_back(a);
+        }
+    }
     if (N == 0) {
         cout << "Los actores no pueden ser 0" << endl;
         return 1;
@@ -250,59 +203,22 @@ ios::sync_with_stdio(false);
 //        cout << "Procesando..." << endl;
 //    }
 
-//    //Sort the actor list;
-//    if (SORT_FLAG == SORT_ASCENDING) {
-//        sort(Actores.begin(), Actores.end(), &actorAsc);
-//    }else{
-//        sort(Actores.begin(), Actores.end(), &actorDesc);
-//    }
-
-    //particionesIndependientesGlobal = generarGruposIndependientesMaximizandoActoresPorGrupo(Actores);
-
-    // Funcion BT Con Poda Golosa EJ2
     auto start = chrono::steady_clock::now(); // Empieza el clock
 
     auto end = chrono::steady_clock::now(); // Termina el clock
     double total_time = chrono::duration<double, milli>(end - start).count();
     vector<actividad> inicial= {};
     vector<vector<resultado>> M(N + 1, vector<resultado>(2*N + 1, undefinedValue));
-    memoization.resize(N, UNDEFINED_VALUE);
+    memoization.resize(N + 1, UNDEFINED_VALUE);
     actividadSiguiente.resize(2*N, UNDEFINED_VALUE);
 
-    vector<int> siguientes = computaActividadesSiguientes();
-
-    //resultado res = b_TOP_DOWN(0, inicial, M);
-    //cout << res.res << endl;
+    actividadSiguiente = generarVectorDeSiguienteActividad();
 
     int a = b_TOP_DOWN_2(0);
     cout << a << " TOP DOWN" << endl;
 
-//
-//    printMatriz(MA);
-//
-//    vector<int> e = reconstruccion_2(MA);
-//    cout  << "--reconstruccion--"<< endl;
-//
-//    for (int i = 0; i < e.size(); ++i) {
-//        cout << e[i] << endl;
-//    }
-//    cout  << "-----------"<< endl;
-
-//    int bottomUp = b_BOTTOM_UP(N);
-//    cout << bottomUp << " BOTTOM UP"<< endl;
-
-    // for (int i = 0; i < res.actividades.size(); ++i) {
-       // cout << "S: " << res.actividades[i].s << "  T: " << res.actividades[i].t << endl;
-    // }
-
-    // printMatriz(M);
-
     cout << "Tiempo de ejecucion: " << total_time << " ms" << endl;
 
-
-//    for (actor a : res.getActores()) {
-//        cout << a.id << " ";
-//    }
     cout << endl;
     return 0;
 }
