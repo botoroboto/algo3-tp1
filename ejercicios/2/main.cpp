@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Correr con ./ejercicio1.exe <instancia> <sort> <debug>
+    // Correr con ./ejercicio2.exe <instancia> <sort> <debug>
     bool debug = false;
     if (argc >= 4) {
         debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
