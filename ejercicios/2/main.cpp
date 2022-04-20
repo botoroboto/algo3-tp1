@@ -209,7 +209,6 @@ clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actor
     return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
 }
 
-// TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
     ios::sync_with_stdio(false);
     cin.tie(0);
@@ -226,7 +225,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    bool debug = true;
+    // Correr con ./ejercicio1.exe <instancia> <sort> <debug>
+    bool debug = false;
     if (argc >= 4) {
         debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
     }

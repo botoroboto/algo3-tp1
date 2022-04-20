@@ -41,7 +41,6 @@ bool sonAmigos(actor a1, actor a2) {
 
 int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
 
-// TODO - Como podemos refactorizar esto para sacarlo del main? O deberiamos tener 4 main.cpp?
 clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
   // Caso base
   if (actoresRestantes.size() < 1) {
@@ -54,7 +53,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
  
   // Poda de optimalidad
   if (sumaRestante + influenciaParcial <= influenciaMax) {
-    return cliqueActual; // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+    return cliqueActual; // No sigo recorriendo nada del arbol porque la suma ya no puede superar al max actual
   }
 
   bool sonTodosAmigos = false;
@@ -81,7 +80,7 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
       }
   }
 
-  if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
+  if (sonTodosAmigos) { // Esto significa que todos son amigos entre todos de K, por lo que podemos meterlos a todos al clique
       cliqueActual.setInfluencia(influenciaParcial);
       if (influenciaParcial > influenciaMax) {
           influenciaMax = sumaRestante + influenciaParcial;
@@ -110,37 +109,35 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
     }
   }
 
-  if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // la suma restante todavía tiene al actor actual en cuenta...
-    return cliqueMasInfluyenteBT2( // no agrego el actor actual al clique
+  if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // Si agregando al actor actual no podemos superar la influencia máxima, no hace falta recorrer Q U {v}
+    return cliqueMasInfluyenteBT2(
       cliqueActual,
       actoresRestantes,
       influenciaParcial,
       sumaRestante - actorActual.influencia
-    ); // No sigo recorriendo nada el arbol porque la suma ya no puede superar al max actual
+    );
   }
 
-  nuevaSumaRestante -= actorActual.influencia; //le resto a la suma restante la influencia del actor actual ya que ahora voy a agregarlo o descartarlo
-
-  clique loAgrego = cliqueMasInfluyenteBT2( //agrego el actor actual al clique (tengo cierta intuición de que si corro esta rama del arbol primero va a ser mas eficiente la poda de optimalidad cuando corra la otra rama)
+  // Recorriendo primero esta clique logramos podar antes, al tener más posibilidades de armar una clique con mayor influencia
+  clique loAgrego = cliqueMasInfluyenteBT2( // Agrego el actor actual a la clique
     cliqueActual.addActor(actorActual),
     nuevoVectorDeActoresRestantes,
-    influenciaParcial + actorActual.influencia,
-    nuevaSumaRestante
+    influenciaParcial + actorActual.influencia, // Sumamos la influencia del actor actual que agregamos a la clique
+    nuevaSumaRestante - actorActual.influencia // Restamos la influencia del actor actual ya que la sumamos a la influencia de la clique actual
   );
 
   cliqueActual.popActor();
   
-  clique noLoAgrego = cliqueMasInfluyenteBT2( //no agrego el actor actual al clique
+  clique noLoAgrego = cliqueMasInfluyenteBT2( // No agrego el actor actual al clique
     cliqueActual,
     actoresRestantes,
     influenciaParcial,
-    sumaRestante - actorActual.influencia
+    sumaRestante - actorActual.influencia // Restamos la influencia del actor actual ya que no será considerado para esta rama 
   );
 
-  return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; //Devuelvo el clique con mas influencia
+  return noLoAgrego.getInfluencia() > loAgrego.getInfluencia() ? noLoAgrego : loAgrego; // Devuelvo el clique con mas influencia
 }
 
-// TODO - Parsear desde un file
 int main(int argc, char *argv[]) {
   ios::sync_with_stdio(false);
   cin.tie(0);
@@ -157,7 +154,8 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  bool debug = true;
+  // Correr con ./ejercicio1.exe <instancia> <sort> <debug>
+  bool debug = false;
   if (argc >= 4) {
     debug = argv[DEBUG_INDEX] == DEBUG_FLAG;
   }
