@@ -229,7 +229,9 @@ int main(int argc, char *argv[]) {
     cout << "Procesando..." << endl;
   }
 
-  //Sort the actor list;
+  auto start = chrono::steady_clock::now(); // Empieza el clock
+
+  // Ordena la lista de actores;
   if (SORT_FLAG == SORT_ASCENDING) {
     sort(Actores.begin(), Actores.end(), &actorAsc);
   }else{
@@ -237,7 +239,6 @@ int main(int argc, char *argv[]) {
   }
 
   // Funcion BT Ej 1
-  auto start = chrono::steady_clock::now(); // Empieza el clock
   clique res = cliqueMasInfluyenteBT2(*new clique(), Actores, 0, sumaInfluenciaTotal);
   auto end = chrono::steady_clock::now(); // Termina el clock
   double total_time = chrono::duration<double, milli>(end - start).count();

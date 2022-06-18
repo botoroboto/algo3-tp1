@@ -24,7 +24,7 @@ fs.readdirSync(basePathInstancias).forEach(instancia => {
     if (stdout) {
       console.log(stdout);
       const executionTime = stdout.split('Tiempo de ejecucion: ');
-      const timing = executionTime[1].split(' ms')[0].trim();
+      const timing = parseFloat(executionTime[1].split(' ms')[0].trim()).toFixed(2);
       const influencia = executionTime[0].split("Influencia: ")[1].trim();
       const newLine = `${instancia.padEnd(25, ' ')}${influencia.padEnd(15, ' ')}${timing.padEnd(15, ' ')}\n`;
       printTimings = `${printTimings}${newLine}`;
