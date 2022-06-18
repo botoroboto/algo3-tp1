@@ -36,6 +36,7 @@ bool actorAsc (const actor& a, const actor& b){
 bool actorDesc (const actor& a, const actor& b){
     return  a.influencia > b.influencia;
 }
+
 struct grupoIndependiente {
     vector<actor> actores = {};
     int influencia = 0;
@@ -48,6 +49,52 @@ struct ParticionesIndependientes {
     int influencia = 0;
 };
 
+bool calcularSonTodosAmigos(clique cliqueActual, vector<actor> &actoresRestantes, int influenciaParcial, int sumaRestante) {
+  bool sonTodosAmigos = false;
+
+  for (int a = 0; a > actoresRestantes.size(); a++) {
+      bool esAmigoDeTodos = true;
+      for (actor &a2 : actoresRestantes) {
+          if (actoresRestantes[a].id < a2.id) {
+              sonTodosAmigos = sonAmigos(actoresRestantes[a], a2);
+              if (!sonTodosAmigos) {
+                  esAmigoDeTodos = false;
+                  break;
+              }
+          } else {
+              break;
+          }
+      }
+      if(esAmigoDeTodos){
+          cliqueActual.addActor(actoresRestantes[a]);
+          influenciaParcial += actoresRestantes[a].influencia;
+          sumaRestante -= actoresRestantes[a].influencia;
+          actoresRestantes.erase(actoresRestantes.begin() + a);
+          a--;
+      }
+  }
+
+  return sonTodosAmigos;
+};
+
+int calcularSumaRestante(actor &actorActual, vector<actor> &nuevoVectorDeActoresRestantes, vector<actor> &actoresRestantes, int influenciaParcial, int influenciaMax, int sumaRestante) {
+  int nuevaSumaRestante = sumaRestante;
+  for (actor a : actoresRestantes) {
+    if (sonAmigos(a, actorActual)) {
+      actor actorTemporal;
+      actorTemporal.id = a.id;
+      actorTemporal.influencia = a.influencia;
+      nuevoVectorDeActoresRestantes.push_back(actorTemporal);
+    } else {
+      nuevaSumaRestante -= a.influencia;
+      if (nuevaSumaRestante + influenciaParcial < influenciaMax) {
+        break;
+      }
+    }
+  }
+
+  return nuevaSumaRestante;
+};
 
 ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(vector<actor> actoresPorAgrupar){
     ParticionesIndependientes res;
@@ -102,7 +149,6 @@ ParticionesIndependientes generarGruposIndependientesMaximizandoActoresPorGrupo(
     return res;
 }
 
-
 clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
     // Caso base
     if (actoresRestantes.empty()) {
@@ -124,30 +170,7 @@ clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actor
         return cliqueActual;
     }
 
-
-    bool sonTodosAmigos = false;
-
-    for (int a = 0; a > actoresRestantes.size(); a++) {
-        bool esAmigoDeTodos = true;
-        for (actor a2 : actoresRestantes) {
-            if (actoresRestantes[a].id < a2.id) {
-                sonTodosAmigos = sonAmigos(actoresRestantes[a], a2);
-                if (!sonTodosAmigos) {
-                    esAmigoDeTodos = false;
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        if(esAmigoDeTodos){
-            cliqueActual.addActor(actoresRestantes[a]);
-            influenciaParcial += actoresRestantes[a].influencia;
-            sumaRestante -= actoresRestantes[a].influencia;
-            actoresRestantes.erase(actoresRestantes.begin() + a);
-            a--;
-        }
-    }
+    bool sonTodosAmigos = calcularSonTodosAmigos(cliqueActual, actoresRestantes, influenciaParcial, sumaRestante);
 
     if (sonTodosAmigos) { // esto significa que todos son amigos entre todos de K por lo que podemos meterlos a todos al clique
         cliqueActual.setInfluencia(influenciaParcial);
@@ -164,20 +187,7 @@ clique cliqueMasInfluyenteConPodaGolosa(clique cliqueActual, vector<actor> actor
     actoresRestantes.erase(actoresRestantes.begin() + 0);
 
     vector<actor> nuevoVectorDeActoresRestantes = {};
-    int nuevaSumaRestante = sumaRestante;
-    for (actor a : actoresRestantes) {
-        if (sonAmigos(a, actorActual)) {
-            actor actorTemporal;
-            actorTemporal.id = a.id;
-            actorTemporal.influencia = a.influencia;
-            nuevoVectorDeActoresRestantes.push_back(actorTemporal);
-        } else {
-            nuevaSumaRestante -= a.influencia;
-            if (nuevaSumaRestante + influenciaParcial < influenciaMax) {
-                break;
-            }
-        }
-    }
+    int nuevaSumaRestante = calcularSumaRestante(actorActual, nuevoVectorDeActoresRestantes, actoresRestantes, influenciaParcial, influenciaMax, sumaRestante);
 
     if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // la suma restante todavía tiene al actor actual en cuenta...
         return cliqueMasInfluyenteConPodaGolosa( // no agrego el actor actual al clique

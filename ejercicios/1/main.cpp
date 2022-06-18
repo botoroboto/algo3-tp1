@@ -39,28 +39,12 @@ bool sonAmigos(actor a1, actor a2) {
   return Amistades[a1.id][a2.id];
 };
 
-int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
-
-clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
-  // Caso base
-  if (actoresRestantes.size() < 1) {
-    cliqueActual.setInfluencia(influenciaParcial);
-    if (influenciaMax < influenciaParcial) {
-      influenciaMax = influenciaParcial;
-    }
-    return cliqueActual;
-  }
- 
-  // Poda de optimalidad
-  if (sumaRestante + influenciaParcial <= influenciaMax) {
-    return cliqueActual; // No sigo recorriendo nada del arbol porque la suma ya no puede superar al max actual
-  }
-
+bool calcularSonTodosAmigos(clique cliqueActual, vector<actor> &actoresRestantes, int influenciaParcial, int sumaRestante) {
   bool sonTodosAmigos = false;
 
   for (int a = 0; a > actoresRestantes.size(); a++) {
       bool esAmigoDeTodos = true;
-      for (actor a2 : actoresRestantes) {
+      for (actor &a2 : actoresRestantes) {
           if (actoresRestantes[a].id < a2.id) {
               sonTodosAmigos = sonAmigos(actoresRestantes[a], a2);
               if (!sonTodosAmigos) {
@@ -80,20 +64,10 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
       }
   }
 
-  if (sonTodosAmigos) { // Esto significa que todos son amigos entre todos de K, por lo que podemos meterlos a todos al clique
-      cliqueActual.setInfluencia(influenciaParcial);
-      if (influenciaParcial > influenciaMax) {
-          influenciaMax = sumaRestante + influenciaParcial;
-      }
-      return cliqueActual;
-  }
+  return sonTodosAmigos;
+};
 
-  actor actorActual;
-  actorActual.id = actoresRestantes[0].id;
-  actorActual.influencia = actoresRestantes[0].influencia;
-  actoresRestantes.erase(actoresRestantes.begin() + 0);
-
-  vector<actor> nuevoVectorDeActoresRestantes = {};
+int calcularSumaRestante(actor &actorActual, vector<actor> &nuevoVectorDeActoresRestantes, vector<actor> &actoresRestantes, int influenciaParcial, int influenciaMax, int sumaRestante) {
   int nuevaSumaRestante = sumaRestante;
   for (actor a : actoresRestantes) {
     if (sonAmigos(a, actorActual)) {
@@ -108,6 +82,44 @@ clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestante
       }
     }
   }
+
+  return nuevaSumaRestante;
+};
+
+int influenciaMax = 0; // Counter para la influencia máxima, voy a ir actualizando con la mejor que tenga hasta el momento
+
+clique cliqueMasInfluyenteBT2(clique cliqueActual, vector<actor> actoresRestantes, int influenciaParcial, int sumaRestante){
+  // Caso base
+  if (actoresRestantes.size() < 1) {
+    cliqueActual.setInfluencia(influenciaParcial);
+    if (influenciaMax < influenciaParcial) {
+      influenciaMax = influenciaParcial;
+    }
+    return cliqueActual;
+  }
+ 
+  // Poda de optimalidad
+  if (sumaRestante + influenciaParcial <= influenciaMax) {
+    return cliqueActual; // No sigo recorriendo nada del arbol porque la suma ya no puede superar al max actual
+  }
+
+  bool sonTodosAmigos = calcularSonTodosAmigos(cliqueActual, actoresRestantes, influenciaParcial, sumaRestante);
+
+  if (sonTodosAmigos) { // Esto significa que todos son amigos entre todos de K, por lo que podemos meterlos a todos al clique
+      cliqueActual.setInfluencia(influenciaParcial);
+      if (influenciaParcial > influenciaMax) {
+          influenciaMax = sumaRestante + influenciaParcial;
+      }
+      return cliqueActual;
+  }
+
+  actor actorActual;
+  actorActual.id = actoresRestantes[0].id;
+  actorActual.influencia = actoresRestantes[0].influencia;
+  actoresRestantes.erase(actoresRestantes.begin() + 0);
+
+  vector<actor> nuevoVectorDeActoresRestantes = {};
+  int nuevaSumaRestante = calcularSumaRestante(actorActual, nuevoVectorDeActoresRestantes, actoresRestantes, influenciaParcial, influenciaMax, sumaRestante);
 
   if (nuevaSumaRestante + influenciaParcial < influenciaMax) { // Si agregando al actor actual no podemos superar la influencia máxima, no hace falta recorrer Q U {v}
     return cliqueMasInfluyenteBT2(
