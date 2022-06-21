@@ -1,32 +1,32 @@
 Instancia              Optimo    Tiempo (ms)       Tiempo referencia (ms)
-brock200_1.clq           2821           416494         >>       20270
-brock200_2.clq           1428           309.82         >>         140
-brock200_3.clq           2062           2881.69        >>         570
-brock200_4.clq           2107           19170          >>        1620
-c-fat200-1.clq           1284           0.9985         ~=           0
-c-fat200-2.clq           2411           4.7833         >>           0
-c-fat200-5.clq           5887           5433.66        >>          10
-c-fat500-1.clq           1354           3.6081         >>           0
-c-fat500-10.clq          undefined      > 600000       >>          70
-c-fat500-2.clq           2628           28.2635        >>          10
-c-fat500-5.clq           5841           66370          >>          20
-C125.9.clq               undefined      > 600000       >>      122100
-DSJC500_5.clq            1725           67993.9        >>       12450
-hamming6-2.clq           1072           6599           >>          40
-hamming6-4.clq           134            0.5884         ~=           0
-hamming8-4.clq           1472           66074.2        >>        3340
-johnson16-2-4.clq        548            10238.8        >>        3910
-johnson8-2-4.clq         66             0.1918         ~=           0
-johnson8-4-4.clq         511            254.998        >>          60
-MANN_a9.clq              372            16417.6        >>         710
-p_hat1000-1.clq          1514           6654.44        >>        3000
-p_hat1500-1.clq          1619           74638.5        >>       27900
-p_hat300-1.clq           1057           32.889         <<          50
-p_hat300-2.clq           2487           382506         >>        4480
-p_hat500-1.clq           1231           320.132        >>         200
-p_hat700-1.clq           1441           1339.4         >>         690
-sanr200_0.7.clq          2325           70479.4        >>        4620
-sanr400_0.5.clq          1835           17608.8        >>        3880
+brock200_1.clq           2821           127558.00               20270
+brock200_2.clq           1428           113.38                    140
+brock200_3.clq           2062           982.98                    570
+brock200_4.clq           2107           6455.30                  1620
+c-fat200-1.clq           1284           0.30                        0
+c-fat200-2.clq           2411           1.39                        0
+c-fat200-5.clq           5887           1436.03                    10
+c-fat500-1.clq           1354           1.30                        0
+c-fat500-10.clq          undefined      > 600000                   70
+c-fat500-2.clq           2628           8.36                       10
+c-fat500-5.clq           5841           17053.90                   20
+C125.9.clq               undefined      > 600000               122100
+DSJC500_5.clq            1725           24600.80                12450
+hamming6-2.clq           1072           1878.30                    40
+hamming6-4.clq           134            0.20                        0
+hamming8-4.clq           1472           22434.40                 3340
+johnson16-2-4.clq        548            3430.85                  3910
+johnson8-2-4.clq         66             0.08                        0
+johnson8-4-4.clq         511            83.83                      60
+MANN_a9.clq              372            4963.50                   710
+p_hat1000-1.clq          1514           2718.42                  3000
+p_hat1500-1.clq          1619           29957.10                27900
+p_hat300-1.clq           1057           13.85                      50
+p_hat300-2.clq           2487           119300.00                4480
+p_hat500-1.clq           1231           130.84                    200
+p_hat700-1.clq           1441           549.15                    690
+sanr200_0.7.clq          2325           22795.20                 4620
+sanr400_0.5.clq          1835           6375.86                  3880
 brock400_2.clq           undefined      > 600000       ~=    > 600000
 brock400_3.clq           undefined      > 600000       ~=    > 600000
 brock400_4.clq           undefined      > 600000       ~=    > 600000
