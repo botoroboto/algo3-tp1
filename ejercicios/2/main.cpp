@@ -49,23 +49,24 @@ struct ParticionesIndependientes {
     int influencia = 0;
 };
 
-bool calcularSonTodosAmigos(clique cliqueActual, vector<actor> &actoresRestantes, int influenciaParcial, int sumaRestante) {
+bool calcularSonTodosAmigos(clique &cliqueActual, vector<actor> &actoresRestantes, int &influenciaParcial, int &sumaRestante) {
   bool sonTodosAmigos = false;
 
-  for (int a = 0; a > actoresRestantes.size(); a++) {
+  for (int a = 0; a < actoresRestantes.size(); a++) {
       bool esAmigoDeTodos = true;
-      for (actor &a2 : actoresRestantes) {
-          if (actoresRestantes[a].id < a2.id) {
+      for (actor a2 : actoresRestantes) {
+          if (actoresRestantes[a].id != a2.id) {
               sonTodosAmigos = sonAmigos(actoresRestantes[a], a2);
               if (!sonTodosAmigos) {
                   esAmigoDeTodos = false;
                   break;
               }
-          } else {
-              break;
           }
       }
-      if(esAmigoDeTodos){
+      if (!sonTodosAmigos) {
+        break;
+      }
+      if (esAmigoDeTodos){
           cliqueActual.addActor(actoresRestantes[a]);
           influenciaParcial += actoresRestantes[a].influencia;
           sumaRestante -= actoresRestantes[a].influencia;
