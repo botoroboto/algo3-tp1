@@ -72,14 +72,6 @@ vector<int> reconstruccion(int j, vector<int> &res) {
 
     return res;
 
-//    vector<int> res = {};
-//    for (int i = memoization.size() - 1; i > 0; --i) {
-//        int dif = memoization[i] - memoization[i-1];
-//        if (dif != 0) {
-//            res.push_back(i+1);
-//        }
-//    }
-
 }
 
 int b_BOTTOM_UP() {
@@ -166,15 +158,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-//    if (debug) {
-//        cout << "Se leyeron " << N << " actores y " << M << " amistades." << endl;
-//        cout << "Procesando..." << endl;
-//    }
+
 
     auto start = chrono::steady_clock::now(); // Empieza el clock
 
-    auto end = chrono::steady_clock::now(); // Termina el clock
-    double total_time = chrono::duration<double, milli>(end - start).count();
+    
     vector<actividad> inicial= {};
     vector<vector<resultado>> M(N + 1, vector<resultado>(2*N + 1, undefinedValue));
     memoization.resize(N + 1, UNDEFINED_VALUE);
@@ -187,6 +175,10 @@ int main(int argc, char *argv[]) {
 
     // int bottomUp = b_BOTTOM_UP();
     // cout << bottomUp << " Bottom Up" << endl;
+	
+	auto end = chrono::steady_clock::now(); // Termina el clock
+    double total_time = chrono::duration<double, milli>(end - start).count();
+	
     for (int i = 0; i < memoization.size(); ++i) {
         cout << memoization[i] <<endl;
     }

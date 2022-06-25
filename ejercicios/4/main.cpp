@@ -136,14 +136,15 @@ int main(int argc, char *argv[]) {
     }
 
     auto start = chrono::steady_clock::now(); // Empieza el clock
-    auto end = chrono::steady_clock::now(); // Termina el clock
-    double total_time = chrono::duration<double, milli>(end - start).count();
+    
     vector<vector<resultado>> M(N + 1, vector<resultado>(2 * N + 1, undefinedValue));
     actividadSiguiente.resize(2 * N, UNDEFINED_VALUE);
 
     actividadSiguiente = generarVectorDeSiguienteActividad();
     resGreedy = greedy();
-
+	
+	auto end = chrono::steady_clock::now(); // Termina el clock
+    double total_time = chrono::duration<double, milli>(end - start).count();
     cout << resGreedy.size() <<endl;
 
     for (int i = 0; i < resGreedy.size(); ++i) {
