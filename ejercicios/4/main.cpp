@@ -74,41 +74,18 @@ vector<int> greedy() {
 
 
 // TODO - Parsear desde un file
-int main(int argc, char *argv[]) {
-
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-    if (argc < 1) {
-        cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
-        return 1;
+int main() {
+    cin >> N;
+    for (int i = 0; i < N; ++i) {
+        actividadConIndice actividadDummy;
+        int v,w;
+        cin >> v >> w;
+        actividadDummy.tarea.inicio = v;
+        actividadDummy.tarea.fin = w;
+        actividadDummy.index = i;
+        actividades.push_back(actividadDummy);
     }
-    ifstream archivo_instancia;
 
-    archivo_instancia.open(argv[FILE_INDEX]);
-    string linea_instancia;
-
-    if (archivo_instancia.is_open()) {
-        while (archivo_instancia.good()) {
-            getline(archivo_instancia, linea_instancia);
-            N = stoi(linea_instancia);
-            int number;
-            cout << "n:" << N << endl;
-            int i = 1;
-
-            actividadConIndice actividadDummy;
-            while (archivo_instancia >> number) {
-                if (i % 2 == 0) {
-                    actividadDummy.tarea.fin = number;
-                    actividadDummy.index = (i / 2) - 1;
-                    actividades.push_back(actividadDummy);
-                } else {
-                    actividadDummy.tarea.inicio = number;
-                }
-                i++;
-            }
-            archivo_instancia.close();
-        }
-    }
     vector<vector<actividadConIndice>> bucketsFin(2 * N + 1, vector<actividadConIndice>{});
     vector<vector<actividadConIndice>> bucketsInicio(2 * N + 1, vector<actividadConIndice>{});
 
@@ -145,12 +122,16 @@ int main(int argc, char *argv[]) {
 	
 	auto end = chrono::steady_clock::now(); // Termina el clock
     double total_time = chrono::duration<double, milli>(end - start).count();
+    cout << endl;
+
+    cout << "Resultado: "<<endl;
     cout << resGreedy.size() <<endl;
 
     for (int i = 0; i < resGreedy.size(); ++i) {
         cout << resGreedy[i] << "  ";
     }
 
+    cout << endl;
     cout << endl;
 
     cout << "Tiempo de ejecucion: " << total_time << " ms" << endl;
