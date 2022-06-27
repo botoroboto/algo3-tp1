@@ -64,7 +64,7 @@ vector<int> reconstruccion(int j, vector<int> &res) {
         return {};
     }else if(ordenadoPorInicio[j].beneficio + memoization[actividadSiguiente[j]] > memoization[j+1]) {
         res.push_back(j);
-        cout << j <<  "DA" << endl;
+        cout << j <<  " " << endl;
         reconstruccion(actividadSiguiente[j], res);
     } else {
         reconstruccion(j + 1, res);
@@ -99,48 +99,25 @@ int b_TOP_DOWN(int i) {
 
 
 // TODO - Parsear desde un file
-int main(int argc, char *argv[]) {
+int main() {
+    cin >> N;
+    B.resize(N);
+    S.resize(N);
+    T.resize(N);
 
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-    if (argc < 1) {
-        cerr << "Parametro faltante: " << endl << "Path al archivo de instancia." << endl;
-        return 1;
+    for (int i = 0; i < N; ++i) {
+        actividad actividadDummy;
+        int v,w,q;
+        cin >> v >> w >> q;
+        actividadDummy.beneficio = q;
+        B[i] = q;
+        S[i] = v;
+        T[i] = w;
+        actividadDummy.fin = w;
+        actividadDummy.inicio = v;
+        ordenadoPorInicio.push_back(actividadDummy);
     }
- ifstream archivo_instancia;
 
-    archivo_instancia.open(argv[FILE_INDEX]);
-    string linea_instancia;
-
-    if (archivo_instancia.is_open()) {
-        while (archivo_instancia.good()) {
-            getline(archivo_instancia, linea_instancia);
-            N = stoi(linea_instancia);
-            int number;
-            cout << "n:" << N << endl;
-            B.resize(N);
-            S.resize(N);
-            T.resize(N);
-            int i = 1;
-
-            actividad actividadDummy;
-            while (archivo_instancia >> number) {
-                if (i % 3 == 0) {
-                    B[(i/3) - 1] = number;
-                    actividadDummy.beneficio = number;
-                    ordenadoPorInicio.push_back(actividadDummy);
-                } else if (i % 3 == 2) {
-                    T[i/3] = number;
-                    actividadDummy.fin = number;
-                }else {
-                    S[i/3] = number;
-                    actividadDummy.inicio = number;
-                }
-                i++;
-            }
-            archivo_instancia.close();
-        }
-    }
     vector<vector<actividadConIndice>> buckets(2*N + 1, vector<actividadConIndice> {});
     for(int a = 0;  a < ordenadoPorInicio.size(); a++){
         actividadConIndice dummy;
@@ -153,12 +130,6 @@ int main(int argc, char *argv[]) {
             ordenadoPorFin.push_back(a);
         }
     }
-    if (N == 0) {
-        cout << "Los actores no pueden ser 0" << endl;
-        return 1;
-    }
-
-
 
     auto start = chrono::steady_clock::now(); // Empieza el clock
 
@@ -171,18 +142,18 @@ int main(int argc, char *argv[]) {
     actividadSiguiente = generarVectorDeSiguienteActividad();
 
     int a = b_TOP_DOWN(0);
-    cout << a << " TOP DOWN" << endl;
+    cout << endl;
+    cout << endl;
+
+    cout << "Resultado: "  << a << endl;
 
     // int bottomUp = b_BOTTOM_UP();
     // cout << bottomUp << " Bottom Up" << endl;
 	
 	auto end = chrono::steady_clock::now(); // Termina el clock
     double total_time = chrono::duration<double, milli>(end - start).count();
-	
-    for (int i = 0; i < memoization.size(); ++i) {
-        cout << memoization[i] <<endl;
-    }
 
+    cout << endl;
     vector<int> res = {};
     vector<int> r = reconstruccion(0, res);
 
